@@ -261,6 +261,29 @@ export const PORTFOLIO_DATA = {
         "Production deployment configuration with optimized metadata for search engine indexing.",
       ],
     },
+    {
+      id: "mindgates-conference",
+      title: "Mindgates Research Conference Forum",
+      clientOrProduct: "Mindgates Softtech Solutions Pvt Ltd",
+      companyContext: "Academic & Conference Web Platform",
+      category: "Scholarly Research & Conference Forum",
+      tagline: "Global academic research conference forum and scholarly publishing portal deployed on Cloudflare Workers",
+      description: "Designed and deployed the official web platform for Mindgates Research Conference Forum, empowering global researchers and scholars to explore upcoming national/international conferences, submit research papers, access academic proceedings, and review peer awards.",
+      stats: [
+        { label: "Hosting", value: "Cloudflare Edge" },
+        { label: "Portal Scope", value: "National & Global" },
+        { label: "Domain", value: "Academic Research" },
+      ],
+      stack: ["React.js", "TypeScript", "Tailwind CSS", "Cloudflare Workers", "REST APIs", "Vite"],
+      image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://mindgatesconference.auqib.workers.dev/",
+      featured: true,
+      architecturalHighlights: [
+        "Architected and deployed responsive conference event catalogues with paper submission portals.",
+        "Integrated edge-accelerated asset delivery and serverless hosting on Cloudflare Workers for global low-latency access.",
+        "Engineered accessible, modular UI design patterns for scholarly proceedings, book releases, and academic award archives.",
+      ],
+    },
   ],
   experiences: [
     {

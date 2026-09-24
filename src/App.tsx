@@ -543,7 +543,7 @@ function WorksShowcase({ onSelectProject }: { onSelectProject: (p: ProjectItem) 
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                     <span className="text-[10px] font-mono text-[hsl(var(--muted))] tracking-widest uppercase">
-                      SYS.0{idx + 1}
+                      SYS.{String(idx + 1).padStart(2, "0")}
                     </span>
                   </div>
 
@@ -551,10 +551,16 @@ function WorksShowcase({ onSelectProject }: { onSelectProject: (p: ProjectItem) 
                     className={`text-[8.5px] uppercase font-mono font-semibold px-2 py-0.5 rounded-md border tracking-wider ${
                       project.companyContext.includes("GitHub")
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                        : project.companyContext.includes("Platform") || project.companyContext.includes("Client")
+                        ? "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30"
                         : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
                     }`}
                   >
-                    {project.companyContext.includes("GitHub") ? "Open Source" : "Enterprise"}
+                    {project.companyContext.includes("GitHub")
+                      ? "Open Source"
+                      : project.companyContext.includes("Platform") || project.companyContext.includes("Client")
+                      ? "Production"
+                      : "Enterprise"}
                   </span>
                 </div>
 
