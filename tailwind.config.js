@@ -4,12 +4,13 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: ["class", '[data-theme="dark"]'],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Instrument Serif', 'serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['"JetBrains Mono"', 'monospace'],
+        display: ['"JetBrains Mono"', 'monospace'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
         bg: "hsl(var(--bg))",

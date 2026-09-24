@@ -1,1047 +1,960 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, useScroll, useSpring, useTransform } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "@studio-freight/lenis";
+import {
+  PORTFOLIO_DATA,
+  type ProjectItem,
+} from "./data/portfolioData";
+import {
+  CinematicBackground,
+  type BackgroundMode,
+} from "./components/CinematicBackground";
+import { ModeSwitcher } from "./components/ModeSwitcher";
+import { ThemeToggle } from "./components/ThemeToggle";
+import { ProjectModal } from "./components/ProjectModal";
+import { DecoupledVisualizer } from "./components/DecoupledVisualizer";
+import {
+  ArrowUpRight,
+  Sparkles,
+  MapPin,
+  Clock,
+  Mail,
+  Phone,
+  CheckCircle,
+  Copy,
+  Code2,
+  GraduationCap,
+  Layers,
+  Cpu,
+  Cloud,
+  Activity,
+} from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── Lenis smooth scroll ────────────────────────────────────────────────────
-let lenis: Lenis | null = null;
-function initLenis() {
-  lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true });
-  lenis.on("scroll", ScrollTrigger.update);
-  const raf = (t: number) => { lenis?.raf(t); requestAnimationFrame(raf); };
-  requestAnimationFrame(raf);
-  gsap.ticker.lagSmoothing(0);
-}
-
-// ─── SVG Filters ───────────────────────────────────────────────────────────
-function SvgFilters() {
+// ─── SVG Icons for GitHub & LinkedIn ─────────────────────────────────────────
+function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg className="svg-filters" aria-hidden>
-      <defs>
-        <filter id="noise-distort">
-          <feTurbulence type="turbulence" baseFrequency="0.025 0.05" numOctaves="2" seed="3" result="noise"/>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-      </defs>
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
     </svg>
   );
 }
 
-// ─── Grain overlay ──────────────────────────────────────────────────────────
-const GrainOverlay = () => <div className="grain-overlay" aria-hidden />;
-
-// ─── Ambient cursor glow ────────────────────────────────────────────────────
-function AmbientGlow() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const fn = (e: MouseEvent) => {
-      if (ref.current) ref.current.style.transform = `translate(${e.clientX - 300}px,${e.clientY - 300}px)`;
-    };
-    window.addEventListener("mousemove", fn, { passive: true });
-    return () => window.removeEventListener("mousemove", fn);
-  }, []);
-  return <div ref={ref} className="cursor-glow" aria-hidden />;
+function LinkedinIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+    </svg>
+  );
 }
 
-// ─── Gradient orbs ─────────────────────────────────────────────────────────
-const GradientOrbs = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-    <div className="orb orb-1" /><div className="orb orb-2" /><div className="orb orb-3" />
-  </div>
-);
-
-// ─── Click ripple ───────────────────────────────────────────────────────────
-function ClickRipple() {
-  const next = useRef(0);
-  useEffect(() => {
-    const click = (e: MouseEvent) => {
-      next.current++;
-      const size = 180 + Math.random() * 80;
-      // create imperatively so we can vary size without state complexity
-      const el = document.createElement("div");
-      el.className = "click-ripple";
-      el.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;width:${size}px;height:${size}px;`;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 950);
-    };
-    window.addEventListener("click", click, { passive: true });
-    return () => window.removeEventListener("click", click);
-  }, []);
-  return null;
+// ─── Smooth Lenis Scroll Initialization ─────────────────────────────────────
+let lenisInstance: Lenis | null = null;
+function initSmoothScroll() {
+  lenisInstance = new Lenis({
+    duration: 1.25,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothWheel: true,
+  });
+  lenisInstance.on("scroll", ScrollTrigger.update);
+  const raf = (time: number) => {
+    lenisInstance?.raf(time);
+    requestAnimationFrame(raf);
+  };
+  requestAnimationFrame(raf);
+  gsap.ticker.lagSmoothing(0);
 }
 
-// ─── Interactive canvas mesh (hero bg) ─────────────────────────────────────
-function CanvasMesh() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouse = useRef({ x: -9999, y: -9999 });
+// ─── Floating Top Pill Navigation ───────────────────────────────────────────
+function TopNavBar() {
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let W = (canvas.width = window.innerWidth);
-    let H = (canvas.height = window.innerHeight);
-    const SPACING = 52;
-    const COLS = Math.ceil(W / SPACING) + 1;
-    const ROWS = Math.ceil(H / SPACING) + 1;
-
-    type Pt = { ox: number; oy: number; x: number; y: number; phase: number };
-    const pts: Pt[] = [];
-    for (let r = 0; r < ROWS; r++)
-      for (let c = 0; c < COLS; c++)
-        pts.push({ ox: c * SPACING, oy: r * SPACING, x: c * SPACING, y: r * SPACING, phase: Math.random() * Math.PI * 2 });
-
-    const onMove = (e: MouseEvent) => { mouse.current = { x: e.clientX, y: e.clientY }; };
-    window.addEventListener("mousemove", onMove, { passive: true });
-
-    let t = 0, raf: number;
-    const draw = () => {
-      t += 0.007;
-      ctx.clearRect(0, 0, W, H);
-
-      for (const p of pts) {
-        const fx = Math.sin(t + p.phase) * 4;
-        const fy = Math.cos(t * 0.65 + p.phase) * 4;
-        const tx = p.ox + fx, ty = p.oy + fy;
-        const dx = tx - mouse.current.x, dy = ty - mouse.current.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        const repel = d < 130 ? ((130 - d) / 130) * 48 : 0;
-        p.x = tx + (dx / (d + 1)) * repel;
-        p.y = ty + (dy / (d + 1)) * repel;
-      }
-
-      ctx.lineWidth = 0.7;
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const p = pts[r * COLS + c];
-          const dx = p.x - mouse.current.x, dy = p.y - mouse.current.y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          const near = Math.max(0, 1 - d / 320);
-          const lineA = 0.10 + near * 0.22;
-          const dotA = 0.14 + near * 0.40;
-          const dotR = 1.2 + near * 2.8;
-
-          if (c < COLS - 1) {
-            const n = pts[r * COLS + c + 1];
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(137,170,204,${lineA})`;
-            ctx.moveTo(p.x, p.y); ctx.lineTo(n.x, n.y); ctx.stroke();
-          }
-          if (r < ROWS - 1) {
-            const n = pts[(r + 1) * COLS + c];
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(137,170,204,${lineA})`;
-            ctx.moveTo(p.x, p.y); ctx.lineTo(n.x, n.y); ctx.stroke();
-          }
-          ctx.beginPath();
-          ctx.fillStyle = `rgba(137,170,204,${dotA})`;
-          ctx.arc(p.x, p.y, dotR, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-
-    const resize = () => {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    };
-    window.addEventListener("resize", resize);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("resize", resize);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  return <canvas ref={canvasRef} className="hero-canvas" aria-hidden />;
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <header className="fixed top-5 inset-x-0 z-50 flex justify-center px-4 pointer-events-none font-mono">
+      <nav aria-label="Main Navigation"
+        className={`pointer-events-auto inline-flex items-center gap-1 sm:gap-2 px-3 py-2 rounded-full backdrop-blur-2xl border transition-all duration-300 shadow-xl ${
+          scrolled
+            ? "bg-[hsl(var(--surface))]/90 border-[hsl(var(--stroke))]"
+            : "bg-[hsl(var(--surface))]/70 border-[hsl(var(--stroke))]/60"
+        }`}
+      >
+        <button
+          onClick={() => lenisInstance?.scrollTo(0)}
+          className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full text-xs font-bold text-[hsl(var(--text))] hover:text-blue-500 transition-colors cursor-pointer"
+        >
+          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+          <span>AY</span>
+        </button>
+
+        <div className="w-px h-3.5 bg-[hsl(var(--stroke))]" />
+
+        <button
+          onClick={() => scrollTo("works")}
+          className="px-3 py-1.5 rounded-full text-[11px] font-medium text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] transition-colors cursor-pointer"
+        >
+          Works
+        </button>
+
+        <button
+          onClick={() => scrollTo("architecture")}
+          className="px-3 py-1.5 rounded-full text-[11px] font-medium text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] transition-colors cursor-pointer"
+        >
+          Architecture
+        </button>
+
+        <button
+          onClick={() => scrollTo("skills")}
+          className="px-3 py-1.5 rounded-full text-[11px] font-medium text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] transition-colors cursor-pointer hidden sm:inline-block"
+        >
+          Stack
+        </button>
+
+        <button
+          onClick={() => scrollTo("experience")}
+          className="px-3 py-1.5 rounded-full text-[11px] font-medium text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] transition-colors cursor-pointer hidden sm:inline-block"
+        >
+          Experience
+        </button>
+
+        <button
+          onClick={() => scrollTo("certifications")}
+          className="px-3 py-1.5 rounded-full text-[11px] font-medium text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] transition-colors cursor-pointer"
+        >
+          Certs
+        </button>
+
+        <div className="w-px h-3.5 bg-[hsl(var(--stroke))]" />
+
+        <ThemeToggle />
+
+        <button
+          onClick={() => scrollTo("contact")}
+          className="px-4 py-1.5 rounded-full bg-[hsl(var(--text))] text-[hsl(var(--bg))] font-bold text-[11px] hover:opacity-85 transition-opacity cursor-pointer"
+        >
+          Connect
+        </button>
+      </nav>
+    </header>
+  );
 }
 
-// ─── Custom cursor ──────────────────────────────────────────────────────────
-function CustomCursor() {
+// ─── Custom Magnetic Pointer Component ──────────────────────────────────────
+function CustomPointer() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
-  const mouse = useRef({ x: 0, y: 0 });
-  const pos = useRef({ x: 0, y: 0 });
+  const mouse = useRef({ x: -100, y: -100 });
+  const pos = useRef({ x: -100, y: -100 });
 
   useEffect(() => {
-    const move = (e: MouseEvent) => {
+    const handleMove = (e: MouseEvent) => {
       mouse.current = { x: e.clientX, y: e.clientY };
-      if (dotRef.current) dotRef.current.style.transform = `translate(${e.clientX - 2.5}px,${e.clientY - 2.5}px)`;
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${e.clientX - 2.5}px, ${e.clientY - 2.5}px, 0)`;
+      }
     };
-    let raf: number;
-    const animate = () => {
-      pos.current.x += (mouse.current.x - pos.current.x) * 0.12;
-      pos.current.y += (mouse.current.y - pos.current.y) * 0.12;
-      if (ringRef.current) ringRef.current.style.transform = `translate(${pos.current.x - 16}px,${pos.current.y - 16}px)`;
-      raf = requestAnimationFrame(animate);
+
+    let animId: number;
+    const render = () => {
+      pos.current.x += (mouse.current.x - pos.current.x) * 0.16;
+      pos.current.y += (mouse.current.y - pos.current.y) * 0.16;
+      if (ringRef.current) {
+        const half = ringRef.current.offsetWidth / 2;
+        ringRef.current.style.transform = `translate3d(${pos.current.x - half}px, ${pos.current.y - half}px, 0)`;
+      }
+      animId = requestAnimationFrame(render);
     };
-    raf = requestAnimationFrame(animate);
-    const over = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest("a,button,[data-hover]")) ringRef.current?.classList.add("hover");
-      else ringRef.current?.classList.remove("hover");
+    animId = requestAnimationFrame(render);
+
+    const handleOver = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest("a, button, [data-hover]")) {
+        ringRef.current?.classList.add("hover");
+      } else {
+        ringRef.current?.classList.remove("hover");
+      }
     };
-    const down = () => ringRef.current?.classList.add("click");
-    const up = () => ringRef.current?.classList.remove("click");
-    window.addEventListener("mousemove", move, { passive: true });
-    window.addEventListener("mouseover", over, { passive: true });
-    window.addEventListener("mousedown", down);
-    window.addEventListener("mouseup", up);
+    const handleDown = () => ringRef.current?.classList.add("click");
+    const handleUp = () => ringRef.current?.classList.remove("click");
+
+    window.addEventListener("mousemove", handleMove, { passive: true });
+    window.addEventListener("mouseover", handleOver, { passive: true });
+    window.addEventListener("mousedown", handleDown);
+    window.addEventListener("mouseup", handleUp);
+
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseover", over);
-      window.removeEventListener("mousedown", down);
-      window.removeEventListener("mouseup", up);
+      cancelAnimationFrame(animId);
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseover", handleOver);
+      window.removeEventListener("mousedown", handleDown);
+      window.removeEventListener("mouseup", handleUp);
     };
   }, []);
 
   return (
     <>
-      <div ref={dotRef} className="cursor-dot" />
-      <div ref={ringRef} className="cursor-ring" />
+      <div ref={dotRef} className="cursor-dot hidden md:block" />
+      <div ref={ringRef} className="cursor-ring hidden md:block" />
     </>
   );
 }
 
-// ─── Scroll progress bar ────────────────────────────────────────────────────
-function ScrollBar() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  return <motion.div className="scroll-progress-bar" style={{ scaleX }} />;
-}
-
-// ─── Magnetic wrap ──────────────────────────────────────────────────────────
-function Mag({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+// ─── Magnetic Wrap Utility ──────────────────────────────────────────────────
+function MagneticWrap({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  const move = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = ref.current; if (!el) return;
-    const r = el.getBoundingClientRect();
-    gsap.to(el, { x: (e.clientX - r.left - r.width / 2) * 0.38, y: (e.clientY - r.top - r.height / 2) * 0.38, duration: 0.35, ease: "power2.out" });
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width / 2) * 0.35;
+    const y = (e.clientY - rect.top - rect.height / 2) * 0.35;
+    gsap.to(el, { x, y, duration: 0.3, ease: "power2.out" });
   }, []);
-  const leave = useCallback(() => { gsap.to(ref.current, { x: 0, y: 0, duration: 0.65, ease: "elastic.out(1,0.4)" }); }, []);
-  return <div ref={ref} className={`magnetic-wrap ${className}`} onMouseMove={move} onMouseLeave={leave}>{children}</div>;
-}
 
-// ─── Text scramble ──────────────────────────────────────────────────────────
-const SC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*";
-function useScramble(el: React.RefObject<HTMLElement | null>, go: boolean, final: string) {
-  useEffect(() => {
-    if (!go || !el.current) return;
-    const node = el.current;
-    const arr = final.split("");
-    const done = new Array(arr.length).fill(false);
-    let idx = 0, frame = 0, raf: number;
-    const step = () => {
-      node.textContent = arr.map((c, i) => { if (c === " ") return " "; if (done[i]) return c; return SC[Math.floor(Math.random() * SC.length)]; }).join("");
-      if (++frame % 2 === 0 && idx < arr.length) { done[idx] = true; idx++; }
-      if (idx < arr.length) raf = requestAnimationFrame(step);
-      else node.textContent = final;
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [go, final, el]);
-}
+  const handleMouseLeave = useCallback(() => {
+    if (ref.current) {
+      gsap.to(ref.current, { x: 0, y: 0, duration: 0.65, ease: "elastic.out(1, 0.4)" });
+    }
+  }, []);
 
-// ─── Kinetic word reveal ────────────────────────────────────────────────────
-type HTag = "h1"|"h2"|"h3"|"p"|"span"|"div";
-function KW({ text, className = "", delay = 0, tag = "span" }: { text: string; className?: string; delay?: number; tag?: HTag }) {
-  const Tag = tag as HTag;
   return (
-    <Tag className={className} aria-label={text}>
-      {text.split(" ").map((w, i) => (
-        <span key={i} className="word-wrap" style={{ marginRight: "0.2em" }}>
-          <motion.span className="word-inner" initial={{ y: "115%" }} whileInView={{ y: "0%" }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.7, delay: delay + i * 0.065, ease: [0.16, 1, 0.3, 1] }}
-            style={{ display: "inline-block" }}>
-            {w}
-          </motion.span>
-        </span>
-      ))}
-    </Tag>
+    <div
+      ref={ref}
+      className={`inline-flex ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+    </div>
   );
 }
 
-// ─── Slot counter ───────────────────────────────────────────────────────────
-function SlotCount({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const [val, setVal] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      obs.disconnect();
-      const t0 = performance.now();
-      const run = (now: number) => {
-        const p = Math.min((now - t0) / 1600, 1);
-        const ease = 1 - Math.pow(1 - p, 4);
-        setVal(Math.round(ease * target));
-        if (p < 1) requestAnimationFrame(run);
-      };
-      requestAnimationFrame(run);
-    }, { threshold: 0.5 });
-    obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [target]);
-  return <span ref={ref}>{val}{suffix}</span>;
-}
-
-// ─── 3D Tilt card ───────────────────────────────────────────────────────────
-function Tilt({ children, className = "", strength = 14 }: { children: React.ReactNode; className?: string; strength?: number }) {
+// ─── 3D Tilt Card ───────────────────────────────────────────────────────────
+function TiltCard({
+  children,
+  className = "",
+  strength = 10,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  strength?: number;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  const move = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = ref.current; if (!el) return;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    gsap.to(el, { rotateY: x * strength, rotateX: -y * strength, transformPerspective: 900, scale: 1.025, duration: 0.3, ease: "power2.out" });
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    gsap.to(el, {
+      rotateY: x * strength,
+      rotateX: -y * strength,
+      transformPerspective: 950,
+      scale: 1.015,
+      duration: 0.3,
+      ease: "power2.out",
+    });
   };
-  const leave = () => { gsap.to(ref.current, { rotateY: 0, rotateX: 0, scale: 1, duration: 0.6, ease: "elastic.out(1,0.4)" }); };
-  return <div ref={ref} className={`card-3d ${className}`} onMouseMove={move} onMouseLeave={leave}>{children}</div>;
-}
 
-// ─── Rotating badge ─────────────────────────────────────────────────────────
-function RotatingBadge() {
-  const text = "SENIOR FRONTEND ENGINEER • REACT • DRUPAL • ";
-  const r = 52;
-  return (
-    <div className="relative w-28 h-28 select-none" data-hover>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-[10px] font-bold text-[hsl(var(--muted))] tracking-widest flex flex-col items-center gap-0.5">
-          <span className="text-[hsl(var(--text))] font-display italic text-sm">6+</span>
-          <span className="text-[9px] uppercase tracking-[0.15em]">yrs</span>
-        </span>
-      </div>
-      <svg className="absolute inset-0 spin-slow" viewBox="0 0 120 120" fill="none">
-        <path id="circle-path" d={`M 60 60 m -${r} 0 a ${r} ${r} 0 1 1 ${r * 2} 0 a ${r} ${r} 0 1 1 -${r * 2} 0`} />
-        <text className="text-[9px]" fill="rgba(255,255,255,0.35)" fontSize="9" letterSpacing="3.2">
-          <textPath href="#circle-path">{text}</textPath>
-        </text>
-      </svg>
-    </div>
-  );
-}
+  const handleLeave = () => {
+    if (ref.current) {
+      gsap.to(ref.current, {
+        rotateY: 0,
+        rotateX: 0,
+        scale: 1,
+        duration: 0.6,
+        ease: "elastic.out(1, 0.4)",
+      });
+    }
+  };
 
-// ─── Parallax image (inner moves slower than card) ──────────────────────────
-function ParallaxImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-  useEffect(() => {
-    if (!ref.current || !imgRef.current) return;
-    gsap.fromTo(imgRef.current,
-      { yPercent: -8 },
-      { yPercent: 8, ease: "none",
-        scrollTrigger: { trigger: ref.current, start: "top bottom", end: "bottom top", scrub: 0.8 } }
-    );
-  }, []);
   return (
-    <div ref={ref} className={`img-parallax-wrap ${className}`}>
-      <img ref={imgRef} src={src} alt={alt} className="img-parallax-inner w-full h-[115%] object-cover -mt-[7.5%] select-none pointer-events-none" />
+    <div
+      ref={ref}
+      className={`card-3d ${className}`}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+    >
+      {children}
     </div>
   );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// 1. LOADING SCREEN
+// 1. INTRO PRELOADER
 // ════════════════════════════════════════════════════════════════════════════
-export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
-  const [count, setCount] = useState(0);
+function IntroLoader({ onComplete }: { onComplete: () => void }) {
+  const [percent, setPercent] = useState(0);
+
   useEffect(() => {
-    let id: number, start: number | null = null;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min(((ts - start) / 2400) * 100, 100);
-      setCount(Math.floor(p));
-      if (p < 100) id = requestAnimationFrame(step);
-      else setTimeout(onComplete, 300);
+    let animId: number;
+    let start: number | null = null;
+    const duration = 1400;
+
+    const step = (now: number) => {
+      if (!start) start = now;
+      const progress = Math.min(((now - start) / duration) * 100, 100);
+      setPercent(Math.floor(progress));
+      if (progress < 100) {
+        animId = requestAnimationFrame(step);
+      } else {
+        setTimeout(onComplete, 180);
+      }
     };
-    id = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(id);
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
   }, [onComplete]);
 
-  const words = ["Design", "Engineer", "Build"];
-  const wi = Math.min(Math.floor((count / 101) * words.length), words.length - 1);
-
   return (
-    <motion.div
-      className="fixed inset-0 z-[9999] bg-[hsl(var(--bg))] flex flex-col justify-between p-8 sm:p-12 select-none overflow-hidden"
-      exit={{ clipPath: "inset(0 0 100% 0)", transition: { duration: 0.9, ease: [0.76, 0, 0.24, 1] } }}
+    <motion.aside
+      aria-label="Portfolio loader"
+      className="fixed inset-0 z-[99999] bg-[hsl(var(--bg))] flex flex-col justify-between p-8 sm:p-14 select-none overflow-hidden font-mono"
+      exit={{
+        clipPath: "inset(0 0 100% 0)",
+        transition: { duration: 0.75, ease: [0.76, 0, 0.24, 1] },
+      }}
     >
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-        className="text-[9px] text-[hsl(var(--muted))] uppercase tracking-[0.4em]">
-        auqib.dev — 2026
-      </motion.div>
-
-      <div className="flex items-center justify-center h-16">
-        <AnimatePresence mode="wait">
-          <motion.span key={words[wi]}
-            initial={{ clipPath: "inset(0 0 100% 0)", y: 16 }}
-            animate={{ clipPath: "inset(0 0 0% 0)", y: 0 }}
-            exit={{ clipPath: "inset(100% 0 0 0)", y: -16 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl md:text-6xl font-display italic text-[hsl(var(--text))]/75">
-            {words[wi]}
-          </motion.span>
-        </AnimatePresence>
+      <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.35em] text-[hsl(var(--muted))]">
+        <span>auqib.dev</span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+          <span>System Environment Ready</span>
+        </span>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-end">
-          <span className="text-[9px] text-[hsl(var(--muted))] uppercase tracking-[0.25em]">Initialising</span>
-          <span className="text-6xl md:text-8xl font-display leading-none tabular-nums">{String(count).padStart(3, "0")}</span>
+      <div className="text-center">
+        <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold tracking-tight text-[hsl(var(--text))]">
+          Auqib Yousuf Ahangar
+        </h1>
+        <p className="text-xs uppercase tracking-[0.25em] text-blue-500 mt-4">
+          Senior Frontend & DevOps Engineer • 7+ Years Experience
+        </p>
+      </div>
+
+      <div className="space-y-3 max-w-xl mx-auto w-full">
+        <div className="flex justify-between items-end text-xs text-[hsl(var(--muted))]">
+          <span>INITIALIZING JETBRAINS MONO RUNTIME</span>
+          <span className="text-[hsl(var(--text))] text-base font-bold">{percent}%</span>
         </div>
-        <div className="h-[1.5px] bg-[hsl(var(--stroke))]/40 overflow-hidden">
-          <div className="accent-gradient h-full origin-left"
-            style={{ transform: `scaleX(${count / 100})`, transition: "transform 80ms linear", boxShadow: "0 0 12px rgba(137,170,204,.5)" }} />
+        <div className="h-[2px] w-full bg-[hsl(var(--stroke))] overflow-hidden rounded-full">
+          <div
+            className="h-full bg-blue-500 origin-left transition-transform duration-75"
+            style={{ transform: `scaleX(${percent / 100})` }}
+          />
         </div>
       </div>
-    </motion.div>
+    </motion.aside>
   );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// 2. HERO
+// 2. HERO SECTION
 // ════════════════════════════════════════════════════════════════════════════
-export function HeroSection() {
-  const [tab, setTab] = useState("Home");
-  const [scrolled, setScrolled] = useState(false);
-  const [ri, setRi] = useState(0);
-  const roles = ["Frontend", "React", "Drupal", "Next.js"];
-  const navs = ["Home", "Work", "About", "Experience"];
+function HeroSection() {
+  const [localTime, setLocalTime] = useState("");
   const { scrollY } = useScroll();
-  const hy = useTransform(scrollY, [0, 900], [0, 60]);
-  const ho = useTransform(scrollY, [600, 950], [1, 0]);
+  const heroY = useTransform(scrollY, [0, 800], [0, 60]);
+  const heroOpacity = useTransform(scrollY, [450, 800], [1, 0]);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
+    const updateTime = () => {
+      const now = new Date();
+      setLocalTime(
+        now.toLocaleTimeString("en-US", {
+          timeZone: "Asia/Kolkata",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        })
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    const id = setInterval(() => setRi(p => (p + 1) % roles.length), 2200);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    gsap.fromTo(".hw", { y: "120%", opacity: 0 }, { y: "0%", opacity: 1, duration: 1, stagger: 0.08, ease: "expo.out", delay: 0.05 });
-    gsap.fromTo(".hs", { opacity: 0, y: 20, filter: "blur(12px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.09, ease: "power3.out", delay: 0.4 });
-  }, []);
-
-  const go = (t: string) => {
-    setTab(t);
-    const m: Record<string, string> = { Work: "work", About: "about", Experience: "experience" };
-    if (m[t]) document.getElementById(m[t])?.scrollIntoView({ behavior: "smooth" });
-    else lenis?.scrollTo(0);
-  };
 
   return (
-    <section className="h-screen w-full flex flex-col justify-between relative overflow-hidden select-none">
-      {/* Interactive canvas mesh + gradient orbs replace the dead video */}
-      <CanvasMesh />
-      <GradientOrbs />
-      <div className="absolute bottom-0 inset-x-0 h-64 bg-gradient-to-t from-[hsl(var(--bg))] to-transparent z-[1]" />
-
-      {/* Nav */}
-      <header className="fixed top-0 inset-x-0 z-50 flex justify-center pt-4 px-4" style={{ isolation: "isolate" }}>
-        <motion.div initial={{ y: -36, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 2.8, duration: 0.8, ease: "easeOut" }}
-          className={`inline-flex items-center rounded-full backdrop-blur-xl border bg-[hsl(var(--surface))]/80 px-2 py-1.5 transition-all duration-500 ${scrolled ? "shadow-2xl shadow-black/50 border-white/15" : "border-white/8"}`}>
-          <Mag>
-            <div className="w-8 h-8 rounded-full relative flex items-center justify-center p-[1px] group overflow-hidden cursor-pointer">
-              <div className="absolute inset-0 accent-gradient group-hover:rotate-180 transition-transform duration-700 rounded-full" />
-              <div className="w-full h-full bg-[hsl(var(--bg))] rounded-full flex items-center justify-center z-10 relative">
-                <span className="font-display italic text-[12px]">AY</span>
-              </div>
-            </div>
-          </Mag>
-          <div className="w-px h-4 bg-[hsl(var(--stroke))] mx-2 hidden sm:block" />
-          <nav className="flex gap-0.5">
-            {navs.map(n => (
-              <button key={n} onClick={() => go(n)}
-                className={`text-[10px] sm:text-[11px] rounded-full px-2 sm:px-3 py-1.5 font-medium transition-all cursor-pointer ${n === "Experience" ? "hidden sm:block" : ""} ${tab === n ? "text-[hsl(var(--text))] bg-[hsl(var(--stroke))]/60" : "text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] hover:bg-[hsl(var(--stroke))]/30"}`}>
-                {n}
-              </button>
-            ))}
-          </nav>
-          <div className="hidden sm:flex items-center gap-0">
-            <div className="w-px h-4 bg-[hsl(var(--stroke))] mx-2" />
-            <Mag>
-              <a href="#contact" onClick={e => { e.preventDefault(); document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }); }}
-                className="relative rounded-full p-[1px] group overflow-hidden">
-                <div className="absolute inset-0 accent-gradient opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
-                <div className="bg-[hsl(var(--surface))] rounded-full px-3 py-1.5 text-[11px] flex items-center gap-1 z-10 relative border border-white/5 group-hover:border-transparent transition-colors">
-                  Say hi <span className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform inline-block">↗</span>
-                </div>
-              </a>
-            </Mag>
-          </div>
-        </motion.div>
-      </header>
-
-      {/* Content */}
-      <motion.div style={{ y: hy, opacity: ho }} className="flex-grow flex flex-col justify-center items-center text-center px-6 z-[2] gap-0 -mt-8 sm:-mt-14 lg:-mt-20">
-        <span className="hs text-[9px] text-[hsl(var(--muted))] uppercase tracking-[0.4em] mb-2 block">
-          Senior Frontend Engineer · Srinagar, India
-        </span>
-
-        <div className="flex items-end gap-6 mb-1.5">
-          <h1 className="flex flex-wrap justify-center gap-x-[0.18em] text-[clamp(3.5rem,12vw,9rem)] font-display italic leading-[0.88] tracking-tight" aria-label="Auqib Ahangar">
-            {["Auqib", "Ahangar"].map((w, i) => (
-              <span key={i} className="overflow-hidden inline-block">
-                <span className="hw inline-block">{w}</span>
-              </span>
-            ))}
-          </h1>
-          <div className="hidden lg:block mb-3 opacity-70">
-            <RotatingBadge />
-          </div>
-        </div>
-
-        <div className="hs flex items-center gap-1.5 text-base md:text-lg text-[hsl(var(--text))]/60 mb-2 h-7 justify-center overflow-hidden">
-          <span>A</span>
-          <span className="min-w-[95px] inline-block font-display italic text-lg md:text-xl text-[hsl(var(--text))] leading-none">
-            <AnimatePresence mode="wait">
-              <motion.span key={ri}
-                initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="inline-block accent-gradient-text">{roles[ri]}</motion.span>
-            </AnimatePresence>
+    <section className="min-h-screen w-full flex flex-col justify-between relative pt-32 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 select-none font-mono">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.8 }}
+        className="flex flex-wrap items-center justify-between gap-4 text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--muted))]"
+      >
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inset-0 rounded-full bg-emerald-500 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
-          <span>developer.</span>
+          <span className="text-[hsl(var(--text))] font-semibold">
+            {PORTFOLIO_DATA.profile.availability}
+          </span>
         </div>
 
-        <p className="hs text-sm text-[hsl(var(--muted))] max-w-sm mb-4 leading-relaxed">
-          6+ years crafting performant, accessible web experiences with React, Next.js, TypeScript & Drupal.
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5">
+            <MapPin className="w-3 h-3 text-blue-500" />
+            <span>Bangalore / Srinagar, IN</span>
+          </span>
+          <span className="flex items-center gap-1.5 text-[hsl(var(--text))] font-bold">
+            <Clock className="w-3 h-3 text-sky-500" />
+            <span>{localTime || "IST"}</span>
+          </span>
+        </div>
+      </motion.div>
+
+      <motion.div
+        style={{ y: heroY, opacity: heroOpacity }}
+        className="my-auto py-10 flex flex-col items-start"
+      >
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] text-[11px] text-blue-500 mb-6">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>7 Years • Frontend Architecture & Cloud DevOps</span>
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[hsl(var(--text))] leading-[1.02] mb-6">
+          Auqib Yousuf Ahangar.
+        </h1>
+
+        <p className="text-base sm:text-xl text-[hsl(var(--muted))] font-normal max-w-3xl leading-relaxed mb-10 font-sans">
+          Frontend Engineer with 7 years of experience building scalable, high-performance web applications across{" "}
+          <span className="text-[hsl(var(--text))] font-semibold underline decoration-blue-500/50 underline-offset-4">
+            React, Next.js, and Headless CMS Ecosystems
+          </span>
+          , paired with 3+ years of cloud infrastructure, Kubernetes containerization, Terraform & Ansible IaC, and GitOps CI/CD delivery.
         </p>
 
-        <div className="hs inline-flex gap-3">
-          <Mag>
-            <button onClick={() => document.getElementById("work")?.scrollIntoView({ behavior: "smooth" })}
-              className="rounded-full text-xs font-semibold relative overflow-hidden group p-[1.5px] cursor-pointer">
-              <span className="absolute inset-0 accent-gradient opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
-              <span className="relative z-10 bg-[hsl(var(--text))] text-[hsl(var(--bg))] rounded-full px-6 py-3 group-hover:bg-[hsl(var(--bg))] group-hover:text-[hsl(var(--text))] transition-colors flex items-center font-semibold">
-                See Work
-              </span>
+        <div className="flex flex-wrap items-center gap-4 font-mono">
+          <MagneticWrap>
+            <button
+              onClick={() =>
+                document.getElementById("works")?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="px-7 py-3.5 rounded-full bg-[hsl(var(--text))] text-[hsl(var(--bg))] font-bold text-xs tracking-wider uppercase hover:opacity-85 transition-opacity flex items-center gap-2 shadow-xl cursor-pointer"
+            >
+              <span>View Case Studies</span>
+              <ArrowUpRight className="w-4 h-4" />
             </button>
-          </Mag>
-          <Mag>
-            <button onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-              className="rounded-full text-xs font-semibold relative overflow-hidden group p-[1.5px] cursor-pointer">
-              <span className="absolute inset-0 accent-gradient opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
-              <span className="relative z-10 bg-[hsl(var(--bg))] rounded-full px-6 py-3 group-hover:bg-transparent border border-[hsl(var(--stroke))] group-hover:border-transparent transition-all flex items-center">
-                Contact
-              </span>
+          </MagneticWrap>
+
+          <MagneticWrap>
+            <button
+              onClick={() =>
+                document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="px-7 py-3.5 rounded-full bg-[hsl(var(--surface))] hover:opacity-80 border border-[hsl(var(--stroke))] text-[hsl(var(--text))] font-bold text-xs tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer backdrop-blur-md"
+            >
+              <span>Architecture Sandbox</span>
+              <Code2 className="w-4 h-4 text-blue-500" />
             </button>
-          </Mag>
+          </MagneticWrap>
         </div>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3.1, duration: 1 }}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none z-[2]">
-        <span className="text-[8px] text-[hsl(var(--muted))] uppercase tracking-[0.3em]">Scroll</span>
-        <div className="w-px h-8 bg-[hsl(var(--stroke))] relative overflow-hidden">
-          <div className="w-full h-1/2 bg-white/50 absolute top-0 animate-scroll-down" />
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.8 }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 border-t border-[hsl(var(--stroke))] font-mono"
+      >
+        {PORTFOLIO_DATA.stats.map((s, i) => (
+          <div key={i} className="flex flex-col">
+            <div className="text-2xl sm:text-3xl font-bold text-[hsl(var(--text))] mb-1">
+              <span>{s.number}</span>
+              <span className="text-blue-500">{s.suffix}</span>
+            </div>
+            <div className="text-[10px] uppercase font-bold tracking-wider text-[hsl(var(--text))]">
+              {s.label}
+            </div>
+            <div className="text-[11px] text-[hsl(var(--muted))] mt-0.5 hidden sm:block font-sans">
+              {s.description}
+            </div>
+          </div>
+        ))}
       </motion.div>
     </section>
   );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// 3. ABOUT
+// 3. FEATURED PROJECTS (3-COLUMN RESPONSIVE GRID)
 // ════════════════════════════════════════════════════════════════════════════
-export function AboutSection() {
-  const headRef = useRef<HTMLHeadingElement>(null);
-  const [go, setGo] = useState(false);
-  useScramble(headRef, go, "Bridging design & engineering");
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setGo(true); obs.disconnect(); } }, { threshold: 0.4 });
-    if (headRef.current) obs.observe(headRef.current);
-    return () => obs.disconnect();
-  }, []);
-
-  // Stagger text paragraphs with ScrollTrigger.batch
-  useEffect(() => {
-    ScrollTrigger.batch(".about-para", {
-      onEnter: els => gsap.fromTo(els, { opacity: 0, y: 24, x: -16 }, { opacity: 1, y: 0, x: 0, duration: 0.7, stagger: 0.1, ease: "power3.out" }),
-      start: "top 88%",
-    });
-    ScrollTrigger.batch(".cert-item", {
-      onEnter: els => gsap.fromTo(els, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" }),
-      start: "top 90%",
-    });
-  }, []);
-
-  const stack = ["React.js","Next.js","TypeScript","Drupal 10/11","Tailwind CSS","GSAP","Framer Motion","SCSS/BEM","Storybook","REST APIs","Node.js","Git/CI-CD","Core Web Vitals","WCAG A11y"];
-
+function WorksShowcase({ onSelectProject }: { onSelectProject: (p: ProjectItem) => void }) {
   return (
-    <section id="about" className="bg-[hsl(var(--bg))] py-10 md:py-14 overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 lg:px-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-start">
-          <div>
-            <KW text="About" tag="div" className="text-[9px] text-[hsl(var(--muted))] uppercase tracking-[0.38em] mb-4 font-semibold flex items-center gap-2 overflow-hidden" />
-            <h2 ref={headRef} className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display italic text-[hsl(var(--text))] leading-tight mb-4 font-mono tracking-tight min-h-[2.5em]">
-              Bridging design & engineering
-            </h2>
-            <div className="space-y-3 text-[hsl(var(--muted))] text-sm leading-relaxed">
-              {[
-                <><span className="text-[hsl(var(--text))] font-medium">Auqib Yousuf Ahangar</span> — Senior Frontend Engineer based in Srinagar, India. 6+ years building scalable, accessible web apps.</>,
-                <>Currently at <span className="text-[hsl(var(--text))] font-medium">Specbee Consulting</span> on React + Drupal 10/11, decoupled Next.js architectures, and Core Web Vitals optimisation.</>,
-                <>I live at the intersection of <span className="text-[hsl(var(--text))] font-medium">performance, accessibility, and craft</span> — making things that feel as good as they work.</>,
-              ].map((t, i) => (
-                <p key={i} className="about-para">{t}</p>
-              ))}
-            </div>
-            <div className="mt-6 space-y-1.5">
-              {["Meta Front-End Developer Specialisation","Acquia Site Studio Certified","JavaScript & TypeScript — Udemy"].map(c => (
-                <div key={c} className="cert-item flex items-center gap-2.5 text-[11px] text-[hsl(var(--muted))]">
-                  <span className="w-1.5 h-1.5 rounded-full accent-gradient flex-shrink-0" />{c}
-                </div>
-              ))}
-            </div>
+    <section id="works" className="py-24 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 relative font-mono">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-blue-500 mb-2">
+            Production Portfolio
           </div>
-
-          <div className="flex flex-col gap-6">
-            {/* Float + tilt avatar card */}
-            <Tilt className="w-full max-w-xs mx-auto md:max-w-none aspect-[3/2] rounded-2xl overflow-hidden border border-[hsl(var(--stroke))]/50 cursor-pointer animate-float">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#89AACC]/12 via-[hsl(var(--surface))] to-[#4E85BF]/8" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
-                <div className="w-16 h-16 rounded-full p-[2px] relative overflow-hidden">
-                  <div className="absolute inset-0 accent-gradient rounded-full" />
-                  <div className="w-full h-full rounded-full bg-[hsl(var(--surface))] flex items-center justify-center z-10 relative">
-                    <span className="font-display italic text-2xl">AY</span>
-                  </div>
-                </div>
-                <span className="text-sm font-medium">Auqib Yousuf Ahangar</span>
-                <span className="text-[11px] text-[hsl(var(--muted))]">Senior Frontend Engineer</span>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inset-0 rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                  <span className="text-[8px] text-[hsl(var(--muted))] uppercase tracking-widest">Available</span>
-                </div>
-              </div>
-              <div className="halftone-overlay absolute inset-0 opacity-[0.07] pointer-events-none" />
-            </Tilt>
-
-            {/* Skill tags — staggered on appear */}
-            <motion.div className="flex flex-wrap gap-1.5"
-              initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
-              variants={{ show: { transition: { staggerChildren: 0.035 } } }}>
-              {stack.map(s => (
-                <motion.span key={s} variants={{ hidden: { opacity: 0, y: 10, scale: 0.9 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: [0.34,1.56,0.64,1] } } }}
-                  className="skill-tag text-[10px] font-medium px-2.5 py-1 rounded-full bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] hover:border-white/20 cursor-default" data-hover>
-                  {s}
-                </motion.span>
-              ))}
-            </motion.div>
-          </div>
+          <h2 className="text-3xl sm:text-5xl font-bold text-[hsl(var(--text))] leading-tight">
+            Featured Projects
+          </h2>
         </div>
+        <p className="text-xs sm:text-sm text-[hsl(var(--muted))] max-w-md leading-relaxed font-sans">
+          Key enterprise platforms and digital products delivered across client accounts and organizational teams.
+        </p>
       </div>
-    </section>
-  );
-}
 
-// ════════════════════════════════════════════════════════════════════════════
-// 4. WORKS — 3D tilt + inner parallax
-// ════════════════════════════════════════════════════════════════════════════
-export function WorksSection() {
-  const projects = [
-    { title: "Decoupled Drupal Platform", cat: "Next.js + Drupal Architecture", img: "https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=1200&auto=format&fit=crop", span: "md:col-span-7" },
-    { title: "Healthcare Learning App",   cat: "React + Tailwind CSS",          img: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop", span: "md:col-span-5" },
-    { title: "Design System Library",     cat: "Storybook + Components",        img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop", span: "md:col-span-5" },
-    { title: "Enterprise Web Platform",   cat: "Drupal 10 + WCAG",              img: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?q=80&w=1200&auto=format&fit=crop", span: "md:col-span-7" },
-  ];
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        {PORTFOLIO_DATA.projects.map((project, idx) => (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6, delay: idx * 0.08 }}
+          >
+            <TiltCard
+              strength={5}
+              className="group relative rounded-2xl overflow-hidden bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] p-5 sm:p-6 flex flex-col justify-between min-h-[460px] cursor-pointer shadow-lg hover:border-blue-500/80 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300"
+            >
+              {/* Subtle visual backdrop */}
+              <div
+                className="absolute inset-0 z-0 opacity-10 dark:opacity-20 group-hover:opacity-30 transition-opacity duration-700 bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
+                style={{ backgroundImage: `url(${project.image})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--surface))] via-[hsl(var(--surface))]/95 to-[hsl(var(--surface))]/70 z-0" />
+              
+              {/* Corner accent glow on hover */}
+              <div className="absolute top-0 right-0 w-36 h-36 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all duration-500" />
 
-  return (
-    <section id="work" className="bg-[hsl(var(--bg))] py-10 md:py-14">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 lg:px-16">
-        <div className="flex justify-between items-end mb-7 w-full">
-          <div>
-            <div className="overflow-hidden mb-2">
-              <KW text="Selected Work" tag="div" className="text-[9px] text-[hsl(var(--muted))] uppercase tracking-[0.38em] font-semibold" />
-            </div>
-            <div className="overflow-hidden">
-              <KW text="Featured projects" tag="h2" delay={0.04} className="text-3xl md:text-5xl font-display font-bold tracking-tight leading-none" />
-            </div>
-          </div>
-          <Mag className="hidden sm:inline-flex">
-            <button onClick={() => document.getElementById("experience")?.scrollIntoView({ behavior: "smooth" })}
-              className="underline-draw rounded-full text-[11px] font-semibold relative overflow-hidden group p-[1.5px] cursor-pointer">
-              <span className="absolute inset-0 accent-gradient opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
-              <span className="relative z-10 bg-[hsl(var(--bg))] rounded-full px-4 py-2 group-hover:bg-transparent border border-[hsl(var(--stroke))] group-hover:border-transparent transition-all flex items-center gap-1.5">
-                View experience ↗
-              </span>
-            </button>
-          </Mag>
-        </div>
+              {/* Card Header: Tech metadata & index bar */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-[hsl(var(--stroke))]/60">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    <span className="text-[10px] font-mono text-[hsl(var(--muted))] tracking-widest uppercase">
+                      SYS.0{idx + 1}
+                    </span>
+                  </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
-          {projects.map((p, i) => (
-            <motion.div key={p.title} className={p.span}
-              initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.75, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}>
-              <Tilt className="rounded-2xl overflow-hidden relative aspect-[4/3] md:aspect-auto md:h-[320px] group cursor-pointer shadow-xl shadow-black/20 border border-[hsl(var(--stroke))]/50" strength={10}>
-                <ParallaxImage src={p.img} alt={p.title} className="absolute inset-0 group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 halftone-overlay opacity-15 mix-blend-multiply pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
-                {/* Bottom label — slides up on hover */}
-                <div className="absolute bottom-0 inset-x-0 p-5 z-10 translate-y-0 group-hover:translate-y-2 transition-transform duration-400">
-                  <span className="text-[8px] uppercase tracking-widest text-white/50 font-bold block mb-0.5">{p.cat}</span>
-                  <h3 className="text-lg md:text-xl font-display italic text-white group-hover:opacity-0 transition-opacity duration-300">{p.title}</h3>
+                  <span
+                    className={`text-[8.5px] uppercase font-mono font-semibold px-2 py-0.5 rounded-md border tracking-wider ${
+                      project.companyContext.includes("GitHub")
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                        : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
+                    }`}
+                  >
+                    {project.companyContext.includes("GitHub") ? "Open Source" : "Enterprise"}
+                  </span>
                 </div>
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-[hsl(var(--bg))]/80 opacity-0 group-hover:opacity-100 backdrop-blur-md transition-all duration-400 flex items-center justify-center z-20 pointer-events-none">
-                  <div className="rounded-full p-[1.5px] relative overflow-hidden shadow-2xl">
-                    <div className="absolute inset-0 accent-gradient animate-gradient-shift rounded-full" />
-                    <div className="bg-[hsl(var(--bg))] px-5 py-2 rounded-full z-10 relative text-[11px] font-semibold tracking-wider flex items-center gap-1">
-                      View — <span className="font-display italic text-sm">{p.title}</span>
+
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="text-[9px] uppercase font-bold tracking-wider text-blue-600 dark:text-[#89AACC]">
+                      {project.category}
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-bold text-[hsl(var(--text))] mt-1 leading-snug group-hover:text-blue-500 transition-colors">
+                      {project.title}
+                    </h3>
+                    <div className="text-[10.5px] text-[hsl(var(--muted))] mt-0.5 font-mono">
+                      {project.clientOrProduct}
                     </div>
                   </div>
-                </div>
-              </Tilt>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// 5. SKILLS — velocity-aware marquee
-// ════════════════════════════════════════════════════════════════════════════
-export function SkillsMarquee() {
-  const t1 = useRef<HTMLDivElement>(null);
-  const t2 = useRef<HTMLDivElement>(null);
-  const a1 = useRef<gsap.core.Tween | null>(null);
-  const a2 = useRef<gsap.core.Tween | null>(null);
-  const lastY = useRef(0), vel = useRef(0);
-
-  const r1 = ["React.js","Next.js","TypeScript","JavaScript ES6+","Drupal 10/11","Tailwind CSS","SCSS/BEM","HTML5 CSS3"];
-  const r2 = ["Framer Motion","GSAP","Storybook","REST APIs","Node.js","Core Web Vitals","WCAG A11y","Git/CI-CD"];
-
-  useEffect(() => {
-    a1.current = gsap.to(t1.current, { xPercent: -50, ease: "none", duration: 28, repeat: -1 });
-    a2.current = gsap.to(t2.current, { xPercent: 50, ease: "none", duration: 32, repeat: -1 });
-    const onScroll = () => {
-      const now = window.scrollY;
-      vel.current = now - lastY.current;
-      lastY.current = now;
-      const f = Math.max(0.3, Math.min(3.5, 1 + Math.abs(vel.current) * 0.05));
-      const d = vel.current > 0 ? 1 : -1;
-      a1.current?.timeScale(f * d);
-      a2.current?.timeScale(f * -d);
-    };
-    const ease = setInterval(() => {
-      vel.current *= 0.8;
-      const f = Math.max(0.8, 1 + Math.abs(vel.current) * 0.04);
-      const d = vel.current > 0 ? 1 : -1;
-      a1.current?.timeScale(f * (d || 1));
-      a2.current?.timeScale(f * -(d || 1));
-    }, 80);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { a1.current?.kill(); a2.current?.kill(); clearInterval(ease); window.removeEventListener("scroll", onScroll); };
-  }, []);
-
-  const Pill = ({ text }: { text: string }) => (
-    <span className="skill-tag text-[10px] font-medium px-3.5 py-1.5 rounded-full border border-[hsl(var(--stroke))] bg-[hsl(var(--surface))] text-[hsl(var(--muted))] hover:text-[hsl(var(--text))] hover:border-white/20 inline-flex items-center gap-2 cursor-default flex-shrink-0" data-hover>
-      <span className="w-1 h-1 rounded-full accent-gradient" />{text}
-    </span>
-  );
-
-  return (
-    <section className="bg-[hsl(var(--surface))]/15 border-y border-[hsl(var(--stroke))]/40 py-8 overflow-hidden">
-      <p className="text-center text-[8px] text-[hsl(var(--muted))] uppercase tracking-[0.38em] mb-5">Tech Stack</p>
-      <div className="overflow-hidden mb-2.5">
-        <div ref={t1} className="flex whitespace-nowrap gap-2.5" style={{ width: "200%" }}>
-          {[...r1,...r1].map((s, i) => <Pill key={i} text={s} />)}
-        </div>
-      </div>
-      <div className="overflow-hidden">
-        <div ref={t2} className="flex whitespace-nowrap gap-2.5" style={{ width: "200%", transform: "translateX(-50%)" }}>
-          {[...r2,...r2].map((s, i) => <Pill key={i} text={s} />)}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// 6. EXPERIENCE
-// ════════════════════════════════════════════════════════════════════════════
-export function ExperienceSection() {
-  const secRef = useRef<HTMLElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-
-  const exp = [
-    { role: "React Developer / Drupal Frontend Dev", company: "Specbee Consulting", period: "Feb 2026 – Present", current: true,
-      bullets: ["Drupal 10/11 themes with Twig, SCSS, SDC component architecture","Decoupled Drupal + Next.js for data-driven applications","Core Web Vitals optimisation — lazy loading, code splitting, caching"] },
-    { role: "Frontend Developer / Software Engineer", company: "Learntastic (American Healthcare Academy)", period: "Dec 2024 – Feb 2026",
-      bullets: ["Led frontend with React, Tailwind CSS and Laravel","Reusable component library and scalable design patterns","Laravel, ASP.NET Core, Node.js API integration"] },
-    { role: "Frontend Developer / Software Engineer", company: "Axelerant Technologies", period: "Dec 2021 – Nov 2024",
-      bullets: ["WordPress → Drupal platform migrations at scale","UI libraries with Storybook and Acquia Site Studio","WCAG-compliant accessible interfaces (semantic HTML + ARIA)","Core Web Vitals improvements (LCP, CLS, INP)"] },
-    { role: "Web Developer / Academic Assistant", company: "CSIR-Indian Institute of Integrative Medicine", period: "Oct 2020 – Dec 2021",
-      bullets: ["Academic web platforms and PHP-MySQL management systems"] },
-  ];
-
-  useEffect(() => {
-    if (!secRef.current || !lineRef.current) return;
-    gsap.fromTo(lineRef.current, { scaleY: 0, transformOrigin: "top" },
-      { scaleY: 1, ease: "none", scrollTrigger: { trigger: secRef.current, start: "top 70%", end: "bottom 80%", scrub: 1 } });
-    gsap.utils.toArray<HTMLElement>(".exp-item").forEach((el, i) => {
-      gsap.fromTo(el, { opacity: 0, x: -40, filter: "blur(6px)" },
-        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75, ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 87%" }, delay: i * 0.04 });
-    });
-  }, []);
-
-  return (
-    <section ref={secRef} id="experience" className="bg-[hsl(var(--bg))] py-10 md:py-14">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12 lg:px-16">
-        <div className="mb-8">
-          <div className="overflow-hidden mb-2">
-            <KW text="Career" tag="div" className="text-[9px] text-[hsl(var(--muted))] uppercase tracking-[0.38em] font-semibold" />
-          </div>
-          <div className="overflow-hidden">
-            <KW text="Work experience" tag="h2" delay={0.04} className="text-3xl md:text-5xl font-display font-bold tracking-tight leading-none" />
-          </div>
-        </div>
-
-        <div className="relative">
-          <div ref={lineRef} className="absolute left-0 md:left-7 top-0 bottom-0 w-px bg-[hsl(var(--stroke))]/60" />
-          <div className="space-y-7 pl-6 md:pl-20">
-            {exp.map((e, i) => (
-              <div key={i} className="exp-item relative">
-                <div className={`absolute -left-6 md:-left-20 top-1.5 w-2.5 h-2.5 rounded-full border-2 ${e.current ? "border-[#89AACC] bg-[#4E85BF] dot-glow" : "border-[hsl(var(--stroke))] bg-[hsl(var(--bg))]"}`} />
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 mb-3">
-                  <div>
-                    <h3 className="text-sm md:text-base font-semibold text-[hsl(var(--text))] leading-snug">{e.role}</h3>
-                    <p className="text-xs text-[hsl(var(--muted))] mt-0.5">{e.company}</p>
+                  
+                  <div className="w-8 h-8 rounded-full bg-[hsl(var(--bg))] group-hover:bg-blue-500 group-hover:text-white text-[hsl(var(--text))] border border-[hsl(var(--stroke))] flex items-center justify-center transition-all duration-300 shadow-sm flex-shrink-0">
+                    <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </div>
-                  <span className={`text-[9px] font-medium px-2.5 py-1 rounded-full border flex-shrink-0 self-start ${e.current ? "border-[#4E85BF]/40 text-[#89AACC] bg-[#4E85BF]/10" : "border-[hsl(var(--stroke))] text-[hsl(var(--muted))]"}`}>
-                    {e.period}
-                  </span>
                 </div>
-                <ul className="space-y-1">
-                  {e.bullets.map((b, j) => (
-                    <li key={j} className="flex items-start gap-2.5 text-xs text-[hsl(var(--muted))] leading-relaxed">
-                      <span className="w-1 h-1 rounded-full bg-[hsl(var(--stroke))]/70 flex-shrink-0 mt-1.5" />{b}
-                    </li>
+              </div>
+
+              {/* Card Footer: Tagline, Metrics & Specs */}
+              <div className="relative z-10 mt-auto pt-4">
+                <p className="text-xs text-[hsl(var(--muted))] mb-4 line-clamp-3 leading-relaxed font-sans">
+                  {project.tagline}
+                </p>
+
+                {/* Metrics ribbon */}
+                <div className="grid grid-cols-3 gap-1.5 py-2.5 px-3 rounded-xl bg-[hsl(var(--bg))]/90 backdrop-blur-sm border border-[hsl(var(--stroke))] mb-3.5 shadow-inner">
+                  {project.stats.map((st) => (
+                    <div key={st.label} className="text-center sm:text-left">
+                      <div className="text-xs sm:text-sm font-bold text-[hsl(var(--text))] font-mono truncate">
+                        {st.value}
+                      </div>
+                      <div className="text-[7.5px] uppercase tracking-wider text-[hsl(var(--muted))] font-mono truncate">
+                        {st.label}
+                      </div>
+                    </div>
                   ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// 7. STATS
-// ════════════════════════════════════════════════════════════════════════════
-export function StatsSection() {
-  const stats = [
-    { n: 6, s: "+", l: "Years Experience" },
-    { n: 50, s: "+", l: "Projects Shipped" },
-    { n: 3, s: "", l: "Certifications" },
-  ];
-  return (
-    <section className="bg-[hsl(var(--bg))] py-10 border-y border-[hsl(var(--stroke))]/30">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-3 gap-4 md:gap-8">
-          {stats.map((s, i) => (
-            <motion.div key={s.l} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16,1,0.3,1] }}
-              className="p-4 md:p-6 bg-[hsl(var(--surface))]/10 rounded-xl border border-[hsl(var(--stroke))]/20 text-center md:text-left">
-              <div className="text-4xl md:text-6xl font-display font-bold leading-none mb-1.5 accent-gradient-text">
-                <SlotCount target={s.n} suffix={s.s} />
-              </div>
-              <span className="text-[9px] uppercase tracking-[0.25em] text-[hsl(var(--muted))] font-semibold">{s.l}</span>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// 8. EXPLORATIONS — parallax gallery
-// ════════════════════════════════════════════════════════════════════════════
-export function ExplorationsSection() {
-  const [active, setActive] = useState<string | null>(null);
-  const sectionRef = useRef<HTMLElement>(null);
-
-  const imgs = [
-    { url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800", r: "rotate-[-2deg]" },
-    { url: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800", r: "rotate-[1.5deg]" },
-    { url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800", r: "rotate-[-1deg]" },
-    { url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=800", r: "rotate-[2deg]" },
-    { url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=800", r: "rotate-[-1.5deg]" },
-    { url: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800", r: "rotate-[1deg]" },
-  ];
-
-  useEffect(() => {
-    ScrollTrigger.batch(".exp-card", {
-      onEnter: els => gsap.fromTo(els,
-        { opacity: 0, y: 40, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.65, stagger: 0.08, ease: "power3.out" }),
-      start: "top 88%",
-    });
-  }, []);
-
-  return (
-    <section ref={sectionRef} id="explorations" className="relative bg-[hsl(var(--bg))] w-full select-none py-10 md:py-14">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16">
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 md:mb-10">
-          <div>
-            <div className="overflow-hidden mb-1">
-              <KW text="Explorations" tag="div" className="text-[9px] text-[hsl(var(--muted))] uppercase tracking-[0.38em] font-semibold" />
-            </div>
-            <div className="overflow-hidden">
-              <KW text="Visual playground" tag="h2" delay={0.04} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold leading-none" />
-            </div>
-          </div>
-          <p className="text-xs text-[hsl(var(--muted))] max-w-[200px] sm:text-right leading-relaxed">
-            Design experiments and side-project explorations.
-          </p>
-        </div>
-
-        {/* Grid — 2 cols mobile, 3 cols desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
-          {imgs.map((img, i) => (
-            <div key={i} className="exp-card opacity-0">
-              <Tilt strength={8} className={`aspect-square w-full rounded-xl md:rounded-2xl border border-[hsl(var(--stroke))]/60 bg-[hsl(var(--surface))]/50 overflow-hidden relative cursor-pointer group shadow-lg ${img.r}`}>
-                <img src={img.url} loading="lazy" alt=""
-                  className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
-                  onClick={() => setActive(img.url)}>
-                  <span className="text-[9px] uppercase tracking-widest text-white/90 font-bold bg-black/50 px-3 py-1.5 rounded-full border border-white/15 pointer-events-none">
-                    Preview
-                  </span>
                 </div>
-                <div className="absolute inset-0" onClick={() => setActive(img.url)} />
-              </Tilt>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <AnimatePresence>
-        {active && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setActive(null)}
-            className="fixed inset-0 bg-black/92 backdrop-blur-xl z-[99999] flex items-center justify-center p-4 cursor-zoom-out">
-            <motion.div
-              initial={{ scale: 0.88, opacity: 0, filter: "blur(20px)" }}
-              animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-              exit={{ scale: 0.9, opacity: 0, filter: "blur(16px)" }}
-              transition={{ duration: 0.4, ease: [0.16,1,0.3,1] }}
-              className="relative w-full max-w-4xl rounded-2xl border border-white/10 overflow-hidden"
-              onClick={e => e.stopPropagation()}>
-              <img src={active} alt="Preview" className="w-full h-auto object-contain max-h-[85vh]" />
-              <button onClick={() => setActive(null)}
-                className="absolute top-4 right-4 bg-black/60 hover:bg-black/90 border border-white/10 text-white rounded-full w-8 h-8 flex items-center justify-center text-[10px] cursor-pointer transition-colors">✕</button>
-            </motion.div>
+                {/* Tags and CTA */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[hsl(var(--stroke))]/40">
+                  <div className="flex flex-wrap gap-1">
+                    {project.stack.slice(0, 3).map((s) => (
+                      <span
+                        key={s}
+                        className="text-[9px] font-mono px-2 py-0.5 rounded-md bg-[hsl(var(--bg))] border border-[hsl(var(--stroke))] text-[hsl(var(--text))]"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => onSelectProject(project)}
+                    className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors"
+                  >
+                    <span>View Specs</span>
+                    <span className="text-xs group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+                </div>
+              </div>
+            </TiltCard>
           </motion.div>
-        )}
-      </AnimatePresence>
+        ))}
+      </div>
     </section>
   );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// 9. CONTACT FOOTER
+// 4. DECOUPLED ARCHITECTURE & DEVOPS SANDBOX
 // ════════════════════════════════════════════════════════════════════════════
-export function ContactFooter() {
-  const mRef = useRef<HTMLDivElement>(null);
+function ArchitectureSection() {
+  return (
+    <section id="architecture" className="py-20 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 relative font-mono">
+      <div className="mb-10 text-center max-w-2xl mx-auto">
+        <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-blue-500 block mb-2">
+          Engineering Sandbox
+        </span>
+        <h2 className="text-3xl sm:text-5xl font-bold text-[hsl(var(--text))] mb-3">
+          Headless CMS to Cloud Delivery Pipeline
+        </h2>
+        <p className="text-xs sm:text-sm text-[hsl(var(--muted))] font-sans">
+          Explore how modern React & Next.js frontends integrate with any backend CMS, automated Terraform & Ansible IaC, Jenkins CI/CD, AWS EKS Kubernetes GitOps, and ELK observability.
+        </p>
+      </div>
+
+      <DecoupledVisualizer />
+    </section>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 5. VELOCITY SKILLS MARQUEE & COMPREHENSIVE TOOLKIT
+// ════════════════════════════════════════════════════════════════════════════
+function SkillsSection() {
+  const marquee1 = useRef<HTMLDivElement>(null);
+  const marquee2 = useRef<HTMLDivElement>(null);
+
+  const row1 = [
+    "React.js",
+    "Next.js",
+    "TypeScript",
+    "Drupal 10/11",
+    "SDC & Twig",
+    "Tailwind CSS",
+    "Core Web Vitals",
+    "WCAG Compliance",
+  ];
+  const row2 = [
+    "AWS EKS / EC2",
+    "Kubernetes & Helm",
+    "Docker Containerization",
+    "Terraform & Ansible",
+    "ArgoCD GitOps",
+    "Jenkins & GitHub Actions",
+    "ELK Stack & DataDog",
+    "Apache Kafka",
+  ];
 
   useEffect(() => {
-    if (!mRef.current) return;
-    const a = gsap.to(mRef.current, { xPercent: -50, ease: "none", duration: 28, repeat: -1 });
-    return () => { a.kill(); };
+    const t1 = gsap.to(marquee1.current, {
+      xPercent: -50,
+      ease: "none",
+      duration: 32,
+      repeat: -1,
+    });
+    const t2 = gsap.to(marquee2.current, {
+      xPercent: 50,
+      ease: "none",
+      duration: 36,
+      repeat: -1,
+    });
+    return () => {
+      t1.kill();
+      t2.kill();
+    };
   }, []);
 
-  // Clip-path reveal on CTA
-  const ctaRef = useRef<HTMLDivElement>(null);
+  return (
+    <section id="skills" className="py-20 border-y border-[hsl(var(--stroke))] bg-[hsl(var(--surface))]/40 overflow-hidden relative z-10 font-mono">
+      <div className="max-w-[1300px] mx-auto px-6 mb-8 text-center">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--muted))] font-bold">
+          Technical Toolkit • Frontend & DevOps Synthesis
+        </span>
+      </div>
+
+      <div className="overflow-hidden mb-3">
+        <div ref={marquee1} className="flex whitespace-nowrap gap-3" style={{ width: "200%" }}>
+          {[...row1, ...row1].map((skill, i) => (
+            <div
+              key={i}
+              className="px-5 py-2 rounded-full bg-[hsl(var(--bg))] border border-[hsl(var(--stroke))] text-xs font-medium text-[hsl(var(--text))] flex items-center gap-2"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span>{skill}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="overflow-hidden mb-12">
+        <div
+          ref={marquee2}
+          className="flex whitespace-nowrap gap-3"
+          style={{ width: "200%", transform: "translateX(-50%)" }}
+        >
+          {[...row2, ...row2].map((skill, i) => (
+            <div
+              key={i}
+              className="px-5 py-2 rounded-full bg-[hsl(var(--bg))] border border-[hsl(var(--stroke))] text-xs font-medium text-[hsl(var(--text))] flex items-center gap-2"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+              <span>{skill}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modern 2026 Structured Category Matrix */}
+      <div className="max-w-[1300px] mx-auto px-6 sm:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        {Object.entries(PORTFOLIO_DATA.skillsMatrix).map(([category, items], catIdx) => {
+          const catMeta = [
+            {
+              icon: <Layers className="w-4 h-4 text-blue-500" />,
+              code: "STACK.01",
+              accent: "from-blue-500/10 via-transparent to-transparent",
+              badge: "Frontend UI",
+            },
+            {
+              icon: <Cpu className="w-4 h-4 text-cyan-500" />,
+              code: "STACK.02",
+              accent: "from-cyan-500/10 via-transparent to-transparent",
+              badge: "Headless CMS",
+            },
+            {
+              icon: <Cloud className="w-4 h-4 text-indigo-500" />,
+              code: "STACK.03",
+              accent: "from-indigo-500/10 via-transparent to-transparent",
+              badge: "Cloud / AWS",
+            },
+            {
+              icon: <Activity className="w-4 h-4 text-rose-500" />,
+              code: "STACK.04",
+              accent: "from-rose-500/10 via-transparent to-transparent",
+              badge: "Observability",
+            },
+          ][catIdx] || {
+            icon: <Code2 className="w-4 h-4 text-blue-500" />,
+            code: `STACK.0${catIdx + 1}`,
+            accent: "from-blue-500/10 via-transparent to-transparent",
+            badge: "Core Stack",
+          };
+
+          return (
+            <motion.div
+              key={category}
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: catIdx * 0.1 }}
+            >
+              <TiltCard
+                strength={6}
+                className="group relative h-full rounded-2xl bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] p-5 sm:p-6 flex flex-col justify-between overflow-hidden shadow-lg hover:border-blue-500/70 hover:shadow-xl transition-all duration-300"
+              >
+                {/* Ambient top corner glow */}
+                <div
+                  className={`absolute top-0 inset-x-0 h-32 bg-gradient-to-b ${catMeta.accent} opacity-40 group-hover:opacity-80 transition-opacity duration-500 pointer-events-none`}
+                />
+
+                <div className="relative z-10">
+                  {/* Category Header Bar */}
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-[hsl(var(--stroke))]/60">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-[hsl(var(--bg))] border border-[hsl(var(--stroke))] flex items-center justify-center group-hover:scale-110 transition-transform">
+                        {catMeta.icon}
+                      </div>
+                      <span className="text-[10px] font-mono font-bold tracking-wider text-[hsl(var(--muted))] uppercase">
+                        {catMeta.code}
+                      </span>
+                    </div>
+
+                    <span className="text-[8.5px] uppercase font-mono font-semibold px-2 py-0.5 rounded-full bg-[hsl(var(--bg))] border border-[hsl(var(--stroke))] text-[hsl(var(--text))]">
+                      {catMeta.badge}
+                    </span>
+                  </div>
+
+                  <h4 className="text-xs sm:text-sm uppercase font-bold text-[hsl(var(--text))] mb-3.5 tracking-wider group-hover:text-blue-500 transition-colors">
+                    {category}
+                  </h4>
+
+                  {/* Interactive Tech Badge Pills */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {items.map((it) => (
+                      <span
+                        key={it}
+                        className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-[hsl(var(--bg))]/90 border border-[hsl(var(--stroke))] text-[hsl(var(--text))] hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-500 transition-all cursor-default select-none shadow-xs"
+                      >
+                        {it}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="relative z-10 pt-4 mt-4 border-t border-[hsl(var(--stroke))]/40 flex items-center justify-between text-[9px] text-[hsl(var(--muted))] font-mono">
+                  <span>{items.length} Production Skills</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </div>
+              </TiltCard>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 6. CAREER LASER TIMELINE
+// ════════════════════════════════════════════════════════════════════════════
+function CareerTimeline() {
+  const lineRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
-    if (!ctaRef.current) return;
-    gsap.fromTo(ctaRef.current,
-      { clipPath: "inset(0 100% 0 0)", opacity: 0 },
-      { clipPath: "inset(0 0% 0 0)", opacity: 1, duration: 1.2, ease: "power4.out",
-        scrollTrigger: { trigger: ctaRef.current, start: "top 85%" } }
+    if (!containerRef.current || !lineRef.current) return;
+    gsap.fromTo(
+      lineRef.current,
+      { scaleY: 0, transformOrigin: "top" },
+      {
+        scaleY: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 75%",
+          end: "bottom 85%",
+          scrub: 1.2,
+        },
+      }
     );
   }, []);
 
-  const txt = "OPEN TO OPPORTUNITIES • LET'S BUILD TOGETHER • ";
-
   return (
-    <section id="contact" className="relative bg-[hsl(var(--bg))] pt-10 pb-6 overflow-hidden border-t border-[hsl(var(--stroke))]/30">
-      <GradientOrbs />
-
-      <div className="w-full overflow-hidden border-y border-[hsl(var(--stroke))]/60 bg-[hsl(var(--bg))]/80 backdrop-blur-sm py-3 mb-8">
-        <div ref={mRef} className="flex whitespace-nowrap font-display italic text-xl sm:text-3xl text-[hsl(var(--text))]/55 uppercase">
-          {Array(14).fill(txt).concat(Array(14).fill(txt)).map((s, i) => <span key={i} className="inline-block px-1">{s}</span>)}
+    <section
+      ref={containerRef}
+      id="experience"
+      className="py-24 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 relative font-mono"
+    >
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+        <div>
+          <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-blue-500 mb-2 block">
+            Professional Experience
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-bold text-[hsl(var(--text))]">
+            7 Years of Engineering Impact
+          </h2>
         </div>
+        <p className="text-xs sm:text-sm text-[hsl(var(--muted))] max-w-md font-sans">
+          End-to-end ownership spanning React/Next.js frontend architectures, Drupal headless systems, and AWS Kubernetes infrastructure.
+        </p>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 flex flex-col items-center text-center relative z-10">
-        <div ref={ctaRef}>
-          <div className="overflow-hidden">
-            <KW text="Let's build" tag="h2" className="text-3xl sm:text-5xl md:text-7xl font-display font-bold leading-none" />
-          </div>
-          <div className="overflow-hidden">
-            <KW text="together." tag="h2" delay={0.08} className="text-3xl sm:text-5xl md:text-7xl font-display italic leading-none" />
-          </div>
-        </div>
-        <p className="text-xs text-[hsl(var(--muted))] max-w-xs mt-4 mb-8 leading-relaxed">
-          Available for frontend contracts, React/Drupal work, and full-time roles.
-        </p>
+      <div className="relative pl-6 md:pl-16">
+        <div
+          ref={lineRef}
+          className="absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-blue-500 via-sky-500 to-indigo-500 laser-glow"
+        />
 
-        <Mag>
-          <a href="mailto:aakkiibb@live.com"
-            className="inline-flex rounded-full p-[1.5px] relative overflow-hidden group cursor-pointer mb-8 shadow-2xl">
-            <div className="absolute inset-0 accent-gradient animate-gradient-shift rounded-full" />
-            <div className="bg-[hsl(var(--bg))] px-7 py-3.5 rounded-full relative z-10 text-sm font-semibold tracking-wide flex items-center gap-2 group-hover:bg-transparent transition-colors">
-              aakkiibb@live.com
-              <span className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform inline-block">↗</span>
-            </div>
-          </a>
-        </Mag>
+        <div className="space-y-12">
+          {PORTFOLIO_DATA.experiences.map((exp, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.65, delay: idx * 0.1 }}
+              className="relative p-6 sm:p-8 rounded-3xl bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] hover:border-blue-500 transition-all shadow-xl"
+            >
+              <div
+                className={`absolute -left-[31px] md:-left-[71px] top-8 w-4 h-4 rounded-full border-2 ${
+                  exp.current
+                    ? "bg-blue-500 border-white dot-glow"
+                    : "bg-[hsl(var(--bg))] border-[hsl(var(--stroke))]"
+                }`}
+              />
 
-        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 pt-6 border-t border-[hsl(var(--stroke))]/20">
-          <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.28em] text-[hsl(var(--muted))] font-semibold">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inset-0 rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-            </span>
-            Available for projects
-          </div>
-          <div className="flex gap-5 text-[11px] text-[hsl(var(--muted))]">
-            {[{ l:"LinkedIn", h:"https://linkedin.com/in/aakkiibb" },{ l:"GitHub", h:"https://github.com/auqibyousuf" }].map(lk => (
-              <a key={lk.l} href={lk.h} target="_blank" rel="noopener noreferrer"
-                className="underline-draw hover:text-[hsl(var(--text))] transition-colors">{lk.l}</a>
-            ))}
-          </div>
-          <div className="text-[8px] text-[hsl(var(--muted))] uppercase tracking-widest opacity-40">© 2026 Auqib Yousuf Ahangar</div>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-[hsl(var(--text))]">
+                    {exp.role}
+                  </h3>
+                  <div className="text-xs font-semibold text-blue-500 mt-0.5">
+                    {exp.company} • {exp.location}
+                  </div>
+                </div>
+
+                <span
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full border self-start ${
+                    exp.current
+                      ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+                      : "border-[hsl(var(--stroke))] text-[hsl(var(--muted))] bg-[hsl(var(--bg))]"
+                  }`}
+                >
+                  {exp.period}
+                </span>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[hsl(var(--bg))] border border-[hsl(var(--stroke))] text-xs font-medium text-emerald-600 dark:text-emerald-300 mb-4">
+                <CheckCircle className="w-3.5 h-3.5" />
+                <span>Impact: {exp.metrics}</span>
+              </div>
+
+              <ul className="space-y-2 mb-6 font-sans">
+                {exp.bullets.map((b, i) => (
+                  <li
+                    key={i}
+                    className="text-xs sm:text-sm text-[hsl(var(--muted))] leading-relaxed flex items-start gap-2.5"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap gap-1.5 pt-4 border-t border-[hsl(var(--stroke))]">
+                {exp.skills.map((sk) => (
+                  <span
+                    key={sk}
+                    className="text-[10px] px-2.5 py-1 rounded-full bg-[hsl(var(--bg))] border border-[hsl(var(--stroke))] text-[hsl(var(--text))]"
+                  >
+                    {sk}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -1049,36 +962,187 @@ export function ContactFooter() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// APP ROOT
+// 7. VERIFIED CERTIFICATIONS & ACCREDITATIONS
+// ════════════════════════════════════════════════════════════════════════════
+function CertificationsSection() {
+  return (
+    <section id="certifications" className="py-20 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 relative font-mono">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div>
+          <span className="text-[10px] uppercase tracking-[0.25em] font-bold text-blue-500 mb-2 block">
+            Verified Credentials & Accreditations
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-bold text-[hsl(var(--text))]">
+            Certifications
+          </h2>
+        </div>
+        <p className="text-xs sm:text-sm text-[hsl(var(--muted))] max-w-md font-sans">
+          Industry-recognized certifications in frontend engineering, cloud content management, and modern typed architectures.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {PORTFOLIO_DATA.certifications.map((cert) => (
+          <div
+            key={cert.name}
+            className="p-6 rounded-2xl bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] hover:border-blue-500/80 transition-all flex flex-col justify-between group shadow-sm hover:shadow-lg"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 group-hover:scale-105 transition-transform">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] uppercase font-bold tracking-widest text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+                  {cert.year}
+                </span>
+              </div>
+
+              <h3 className="text-sm sm:text-base font-bold text-[hsl(var(--text))] leading-snug group-hover:text-blue-500 transition-colors">
+                {cert.name}
+              </h3>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-[hsl(var(--stroke))]/60 text-xs text-[hsl(var(--muted))] flex items-center justify-between">
+              <span>{cert.issuer}</span>
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 8. HIGH-CONVERTING MAGNETIC FOOTER
+// ════════════════════════════════════════════════════════════════════════════
+function ContactSection() {
+  const [copied, setCopied] = useState(false);
+
+  const copyEmail = () => {
+    navigator.clipboard.writeText(PORTFOLIO_DATA.profile.email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  };
+
+  return (
+    <footer id="contact" className="pt-24 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 relative font-mono">
+      <div className="rounded-3xl bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] p-8 sm:p-14 text-center relative overflow-hidden shadow-2xl backdrop-blur-2xl">
+        <div className="text-[10px] uppercase font-bold tracking-[0.3em] text-blue-500 mb-4">
+          Direct Contact & Engagements
+        </div>
+
+        <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold text-[hsl(var(--text))] mb-6 leading-tight">
+          Let’s build resilient platforms.
+        </h2>
+
+        <p className="text-xs sm:text-sm text-[hsl(var(--muted))] max-w-xl mx-auto mb-10 leading-relaxed font-sans">
+          Available for senior frontend consulting, decoupled React + Next.js Drupal architecture, and cloud DevOps engineering.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+          <MagneticWrap>
+            <a
+              href={`mailto:${PORTFOLIO_DATA.profile.email}`}
+              className="px-7 py-3.5 rounded-full bg-[hsl(var(--text))] text-[hsl(var(--bg))] font-bold text-xs uppercase tracking-wider hover:opacity-85 transition-opacity flex items-center gap-2 shadow-2xl cursor-pointer"
+            >
+              <Mail className="w-4 h-4" />
+              <span>{PORTFOLIO_DATA.profile.email}</span>
+            </a>
+          </MagneticWrap>
+
+          <MagneticWrap>
+            <a
+              href={`tel:${PORTFOLIO_DATA.profile.phone}`}
+              className="px-6 py-3.5 rounded-full bg-[hsl(var(--bg))] hover:opacity-80 border border-[hsl(var(--stroke))] text-[hsl(var(--text))] font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <Phone className="w-4 h-4 text-emerald-500" />
+              <span>{PORTFOLIO_DATA.profile.phone}</span>
+            </a>
+          </MagneticWrap>
+
+          <MagneticWrap>
+            <button
+              onClick={copyEmail}
+              className="px-6 py-3.5 rounded-full bg-[hsl(var(--bg))] hover:opacity-80 border border-[hsl(var(--stroke))] text-[hsl(var(--text))] font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
+            >
+              {copied ? <CheckCircle className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+              <span>{copied ? "Copied!" : "Copy Email"}</span>
+            </button>
+          </MagneticWrap>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-[hsl(var(--stroke))] text-xs text-[hsl(var(--muted))]">
+          <div className="flex items-center gap-6">
+            <a
+              href={PORTFOLIO_DATA.profile.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[hsl(var(--text))] transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <GithubIcon className="w-4 h-4" />
+              <span>GitHub</span>
+            </a>
+            <a
+              href={PORTFOLIO_DATA.profile.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[hsl(var(--text))] transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <LinkedinIcon className="w-4 h-4" />
+              <span>LinkedIn</span>
+            </a>
+          </div>
+
+          <div>
+            © {new Date().getFullYear()} {PORTFOLIO_DATA.profile.name} • {PORTFOLIO_DATA.profile.education.degree} ({PORTFOLIO_DATA.profile.education.years})
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MAIN ROOT APP
 // ════════════════════════════════════════════════════════════════════════════
 export default function App() {
   const [loading, setLoading] = useState(true);
-  useEffect(() => { if (!loading) setTimeout(initLenis, 80); }, [loading]);
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [bgMode, setBgMode] = useState<BackgroundMode>("cinematic-video");
+
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(initSmoothScroll, 80);
+    }
+  }, [loading]);
 
   return (
-    <div className="bg-[hsl(var(--bg))] text-[hsl(var(--text))] font-sans antialiased min-h-screen relative w-full">
-      <SvgFilters />
-      <GrainOverlay />
-      <AmbientGlow />
-      <CustomCursor />
-      <ScrollBar />
-      <ClickRipple />
+    <div className="bg-[hsl(var(--bg))] text-[hsl(var(--text))] min-h-screen relative w-full overflow-x-hidden transition-colors duration-300">
+      <CinematicBackground mode={bgMode} />
+      <TopNavBar />
+      <CustomPointer />
+      <ModeSwitcher currentMode={bgMode} onModeChange={setBgMode} />
+
+      <ProjectModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+      />
 
       <AnimatePresence>
-        {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
+        {loading && <IntroLoader onComplete={() => setLoading(false)} />}
       </AnimatePresence>
 
       {!loading && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="relative w-full">
+        <main className="relative z-10">
           <HeroSection />
-          <AboutSection />
-          <WorksSection />
-          <SkillsMarquee />
-          <ExperienceSection />
-          <ExplorationsSection />
-          <StatsSection />
-          <ContactFooter />
-        </motion.div>
+          <WorksShowcase onSelectProject={setSelectedProject} />
+          <ArchitectureSection />
+          <SkillsSection />
+          <CareerTimeline />
+          <CertificationsSection />
+          <ContactSection />
+        </main>
       )}
     </div>
   );

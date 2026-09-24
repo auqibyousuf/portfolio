@@ -1,0 +1,395 @@
+export interface ProjectItem {
+  id: string;
+  title: string;
+  clientOrProduct: string;
+  companyContext: string;
+  category: string;
+  tagline: string;
+  description: string;
+  stats: { label: string; value: string }[];
+  stack: string[];
+  image: string;
+  demoUrl?: string;
+  featured: boolean;
+  architecturalHighlights: string[];
+}
+
+export interface ExperienceItem {
+  role: string;
+  company: string;
+  period: string;
+  location: string;
+  current?: boolean;
+  metrics: string;
+  bullets: string[];
+  skills: string[];
+}
+
+export const PORTFOLIO_DATA = {
+  profile: {
+    name: "Auqib Yousuf Ahangar",
+    shortName: "Auqib Ahangar",
+    title: "Senior Frontend & DevOps Engineer",
+    experienceYears: "7+",
+    location: "Bangalore / Srinagar, India",
+    phone: "+91 7006599249",
+    availability: "Available for Senior Frontend & Cloud Infrastructure Engineering",
+    email: "yauqib@gmail.com",
+    github: "https://github.com/auqibyousuf",
+    linkedin: "https://linkedin.com/in/aakkiibb",
+    bio: "Senior Frontend & DevOps Engineer with 7 years of engineering experience delivering enterprise web platforms and cloud-native solutions across React, Next.js, Headless CMS ecosystems, Kubernetes, AWS infrastructure, and GitOps automation.",
+    education: {
+      degree: "Bachelor in Computer Science",
+      institution: "SSM College of Engineering, Srinagar",
+      years: "2015 – 2018",
+    },
+    languages: "English — C2 Proficient",
+  },
+  stats: [
+    { number: 7, suffix: "+", label: "Years Experience", description: "Frontend architecture & cloud infrastructure delivery" },
+    { number: 20, suffix: "%", label: "Build Time Reduced", description: "CI/CD & Gradle pipeline automation" },
+    { number: 99, suffix: "%", label: "Core Web Vitals", description: "Optimized LCP, CLS, INP across enterprise apps" },
+    { number: 3, suffix: "x", label: "Certified Engineer", description: "Meta Front-End, Acquia Drupal & TS Certified" },
+  ],
+  projects: [
+    {
+      id: "british-business-bank",
+      title: "British Business Bank",
+      clientOrProduct: "British Business Bank",
+      companyContext: "Enterprise Client Collaboration",
+      category: "Fintech & Government Banking Platform",
+      tagline: "High-security financial digital platform delivering accessible, scalable SME finance solutions",
+      description: "Collaborated on the frontend architecture and design system integration for the British Business Bank, developing WCAG-compliant UI patterns, decoupled CMS interfaces, and secure data-driven components supporting millions of UK business finance queries.",
+      stats: [
+        { label: "Accessibility", value: "WCAG 2.1 AA" },
+        { label: "Architecture", value: "Decoupled / SDC" },
+        { label: "Security", value: "Enterprise Banking" },
+      ],
+      stack: ["React.js", "Next.js", "Headless CMS", "Tailwind CSS", "TypeScript", "REST APIs", "Jest"],
+      image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://www.british-business-bank.co.uk",
+      featured: true,
+      architecturalHighlights: [
+        "Implemented strict WCAG 2.1 AA accessibility guidelines, screen reader semantics, and high-contrast color standards.",
+        "Built component-driven UI modules mirrored across design tokens and backend CMS templates.",
+        "Collaborated across distributed teams adhering to strict Agile delivery and financial security compliance.",
+      ],
+    },
+    {
+      id: "ladwp",
+      title: "LADWP (Los Angeles Dept of Water & Power)",
+      clientOrProduct: "LADWP",
+      companyContext: "Public Utility Infrastructure",
+      category: "Municipal Utility & Citizen Portal",
+      tagline: "Mission-critical utility platform serving 4M+ residents with high-availability digital services",
+      description: "Contributed to front-end feature development, enterprise CMS replatforming, and performance optimization for the nation's largest municipal utility, delivering resilient customer portals, outage tracking integrations, and seamless user experiences.",
+      stats: [
+        { label: "Citizens Served", value: "4M+ Residents" },
+        { label: "Performance", value: "Sub-Second LCP" },
+        { label: "Scale", value: "Public Utility" },
+      ],
+      stack: ["React", "CMS Architecture", "SCSS", "JavaScript ES6+", "REST APIs", "Docker"],
+      image: "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://www.ladwp.com",
+      featured: true,
+      architecturalHighlights: [
+        "Delivered responsive, accessible interfaces for complex utility billing calculators and civic services.",
+        "Engineered reusable components integrating with legacy backend APIs through normalized middleware.",
+        "Optimized client-side rendering bottlenecks, reducing Total Blocking Time (TBT) significantly.",
+      ],
+    },
+    {
+      id: "ozone-mdm",
+      title: "OZONE Platform & MDM (Mobile Device Management)",
+      clientOrProduct: "Axelerant Proprietary Product",
+      companyContext: "Axelerant Technologies",
+      category: "Enterprise Mobile Device Management (MDM)",
+      tagline: "Company device management, endpoint policy enforcement, and organizational security suite",
+      description: "Engineered core interface modules and administration dashboards for OZONE's Mobile Device Management (MDM) solution. Built secure device enrollment portals, corporate policy compliance inspectors, telemetry dashboards, Storybook UI components, and containerized deployment workflows.",
+      stats: [
+        { label: "Product Domain", value: "Device Management" },
+        { label: "Policy Engine", value: "Company Security" },
+        { label: "Component System", value: "Storybook / React" },
+      ],
+      stack: ["React.js", "TypeScript", "Storybook", "Docker", "REST APIs", "Tailwind CSS", "Jest"],
+      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://axelerant.com",
+      featured: true,
+      architecturalHighlights: [
+        "Engineered Mobile Device Management (MDM) administrative consoles for company device provisioning, security policies, and compliance tracking.",
+        "Built responsive device telemetry dashboards with virtualized lists and real-time status indicators.",
+        "Designed and maintained unified Storybook design system tokens accelerating multi-team feature development.",
+        "Containerized development and testing environments using Docker, streamlining developer onboarding.",
+      ],
+    },
+    {
+      id: "ahca-acca-acls",
+      title: "AHCA / ACCA / ACLS Certification Suite",
+      clientOrProduct: "Learntastic Healthcare Products",
+      companyContext: "Learntastic / American Healthcare Academy",
+      category: "Proprietary Healthcare Certification Products",
+      tagline: "National healthcare certification portals empowering 350k+ clinical professionals across the US",
+      description: "Led frontend modernization and DevOps adoption across Learntastic's flagship medical training products (AHCA, ACCA, ACLS). Replatformed legacy templates to Laravel Blade, Tailwind CSS & React, while pioneering Kubernetes and GitOps continuous delivery.",
+      stats: [
+        { label: "Infra Cost", value: "-20% via K8s" },
+        { label: "Active Trainees", value: "350k+ Clinical" },
+        { label: "GitOps Deploy", value: "ArgoCD / Helm" },
+      ],
+      stack: ["React", "Laravel Blade", "Tailwind CSS", "Kubernetes", "Helm", "ArgoCD", "Terraform", "Kafka"],
+      image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://nationalcprfoundation.com",
+      featured: true,
+      architecturalHighlights: [
+        "Engineered dynamic v1, v2 and live variant sections in shared templates for conversion-boosting A/B tests.",
+        "Authored and maintained Helm charts to standardize Kubernetes deployments across microservices.",
+        "Configured Terraform remote state backend on AWS S3 & DynamoDB for infrastructure-as-code reliability.",
+        "Implemented event streaming with Apache Kafka and unified observability via ELK Stack.",
+      ],
+    },
+    {
+      id: "institute-of-physics",
+      title: "Institute of Physics (IOP)",
+      clientOrProduct: "Institute of Physics",
+      companyContext: "Scientific Society & Publishing Client",
+      category: "Academic & Scientific Publishing Platform",
+      tagline: "International scientific portal uniting global physics communities and academic research",
+      description: "Collaborated on engineering component-driven frontend architecture and publishing workflows for the Institute of Physics. Built modular layouts, accessible content navigation, and responsive typography optimized for scientific journals and institutional members.",
+      stats: [
+        { label: "Community", value: "Global Scientific" },
+        { label: "Accessibility", value: "WCAG Compliant" },
+        { label: "Standards", value: "SDC / Component UI" },
+      ],
+      stack: ["React", "Headless CMS", "Twig", "SCSS", "JavaScript", "HTML5", "Accessibility A11y"],
+      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://www.iop.org",
+      featured: true,
+      architecturalHighlights: [
+        "Developed component-driven UI templates ensuring high legibility for technical scientific publications.",
+        "Engineered accessible taxonomy filtering and responsive search result displays for academic research.",
+        "Ensured cross-browser consistency and high Core Web Vitals across low-bandwidth international connections.",
+      ],
+    },
+    {
+      id: "jewelers-mutual",
+      title: "Jewelers Mutual Insurance",
+      clientOrProduct: "Jewelers Mutual",
+      companyContext: "Enterprise Insurance Client",
+      category: "Enterprise Insurtech & Policyholder Portal",
+      tagline: "Leading North American jewelry insurance digital experience platform and policyholder portal",
+      description: "Collaborated on digital transformation and CMS replatforming for Jewelers Mutual, building modern, accessible frontend components, policy application flows, and high-performance UI patterns for personal and commercial jewelry insurance.",
+      stats: [
+        { label: "Industry", value: "North America Insurtech" },
+        { label: "UX Metric", value: "Pass (Core Web Vitals)" },
+        { label: "Compliance", value: "Enterprise Insurance" },
+      ],
+      stack: ["React", "Next.js", "Enterprise CMS", "Tailwind CSS", "TypeScript", "REST APIs", "Docker"],
+      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://www.jewelersmutual.com",
+      featured: true,
+      architecturalHighlights: [
+        "Developed trust-building, highly accessible policy quotation flows and customer-facing interfaces.",
+        "Re-engineered legacy frontend layouts into reusable, modular component patterns with strict design fidelity.",
+        "Collaborated with backend and QA engineers in Agile sprints to ensure defect-free production rollouts.",
+      ],
+    },
+    {
+      id: "eks-terraform-infra",
+      title: "AWS EKS Production Cluster Automation",
+      clientOrProduct: "Cloud Infrastructure Project",
+      companyContext: "Personal GitHub Engineering",
+      category: "Infrastructure as Code (IaC)",
+      tagline: "Full Terraform automated provisioning of scalable AWS EKS clusters, VPCs, and node groups",
+      description: "Production-ready Infrastructure as Code (IaC) repository automating multi-AZ VPC networking, IAM security policies, EKS cluster control planes, managed node groups, and Kubernetes cluster addons.",
+      stats: [
+        { label: "Orchestration", value: "AWS EKS" },
+        { label: "IaC Engine", value: "Terraform HCL" },
+        { label: "Networking", value: "Multi-AZ VPC" },
+      ],
+      stack: ["Terraform", "AWS EKS", "VPC Peering", "IAM Roles", "Security Groups", "Kubernetes"],
+      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://github.com/auqibyousuf/eks-terraform",
+      featured: true,
+      architecturalHighlights: [
+        "Modular Terraform configuration separating VPC, IAM, security groups, and EKS node groups.",
+        "Integrated AWS EKS cluster addons (vpc-cni, coredns, kube-proxy) with IAM roles for service accounts (IRSA).",
+        "Includes variable definitions, output contracts, and example environment configurations for rapid cluster spins.",
+      ],
+    },
+    {
+      id: "elk-stack-automation",
+      title: "ELK Stack Automated Logging Infrastructure",
+      clientOrProduct: "Observability & Telemetry Project",
+      companyContext: "Personal GitHub Engineering",
+      category: "Cloud Observability & Centralized Logging",
+      tagline: "Automated provisioning and configuration of Elasticsearch, Logstash, and Kibana with Ansible & Terraform",
+      description: "Engineered automated deployment playbooks and infrastructure scripts for centralized log aggregation. Combines Terraform cloud provisioning with Ansible configuration playbooks to deploy and maintain ELK clusters for microservice telemetry.",
+      stats: [
+        { label: "Observability", value: "ELK Stack" },
+        { label: "Config Automation", value: "Ansible" },
+        { label: "Provisioning", value: "Terraform" },
+      ],
+      stack: ["Ansible", "Terraform", "Elasticsearch", "Logstash", "Kibana", "Linux Administration"],
+      image: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://github.com/auqibyousuf/elk",
+      featured: true,
+      architecturalHighlights: [
+        "Ansible playbooks automating installation, tuning, and cluster configuration for Elasticsearch nodes.",
+        "Logstash pipeline configurations for ingesting, filtering, and normalizing distributed microservice application logs.",
+        "Automated provisioning script integration ensuring repeatable zero-drift observability deployments.",
+      ],
+    },
+    {
+      id: "dr-baigs-clinic",
+      title: "Dr. Baig's Clinic Healthcare Portal",
+      clientOrProduct: "Dr. Baig's Specialty Clinic",
+      companyContext: "Production Client Web Application",
+      category: "Healthcare Web Application",
+      tagline: "Modern healthcare application built with Next.js, TypeScript, Tailwind CSS, and ScrollReveal",
+      description: "Designed and developed a production healthcare practice web application featuring patient service directories, accessible medical service layouts, interactive booking interfaces, and responsive animation choreographies.",
+      stats: [
+        { label: "Framework", value: "Next.js" },
+        { label: "Language", value: "TypeScript" },
+        { label: "Design", value: "Tailwind CSS" },
+      ],
+      stack: ["Next.js", "TypeScript", "Tailwind CSS", "ScrollReveal", "PostCSS", "Vercel"],
+      image: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=1200&auto=format&fit=crop",
+      demoUrl: "https://github.com/auqibyousuf/DrBaigsClinic",
+      featured: true,
+      architecturalHighlights: [
+        "Structured component-driven architecture with strict TypeScript type definitions.",
+        "Custom scroll animation configurations for intuitive, high-legibility patient service discovery.",
+        "Production deployment configuration with optimized metadata for search engine indexing.",
+      ],
+    },
+  ],
+  experiences: [
+    {
+      role: "React Developer & DevOps Engineer",
+      company: "Specbee Consulting",
+      period: "Feb 2026 – Sept 2026",
+      location: "Bangalore / Remote",
+      current: false,
+      metrics: "Decoupled Next.js architecture & 20% CI/CD build speed reduction",
+      bullets: [
+        "Re-engineered the frontend into a decoupled Drupal-Next.js architecture, building custom Drupal 10/11 themes with reusable, component-driven design (SDC, Twig, SCSS).",
+        "Integrated REST APIs to deliver dynamic, content-driven experiences with clean separation between CMS and frontend presentation.",
+        "Improved Core Web Vitals (LCP, CLS, INP) through lazy loading, code splitting, and edge caching strategies.",
+        "Streamlined CI/CD pipelines for Java-based applications using Gradle, reducing build and deployment times by 20%.",
+        "Configured and managed AWS EKS clusters (node groups, IAM roles, security groups) and deployed containerized Kubernetes microservices.",
+        "Managed AWS networking components (VPC peering, Load Balancing, Compute, IAM), earning formal commendation.",
+      ],
+      skills: ["React.js", "Next.js", "Drupal 10/11", "SDC", "Docker", "Kubernetes", "AWS EKS", "Terraform", "Gradle"],
+    },
+    {
+      role: "Frontend Developer & DevOps Engineer",
+      company: "Learntastic (American Healthcare Academy)",
+      period: "Dec 2024 – Feb 2026",
+      location: "Remote",
+      metrics: "Pioneered Kubernetes adoption cutting infrastructure costs by 20%",
+      bullets: [
+        "Led migration of frontend development from legacy CodeIgniter PHP templates to Laravel Blade and Tailwind CSS across AHCA, ACCA, and ACLS products.",
+        "Engineered v1, v2 and live variants within shared templates using conditional logic, eliminating duplicate files.",
+        "Pioneered Kubernetes adoption across the organization with ArgoCD for GitOps-based continuous deployment.",
+        "Authored and maintained Helm charts to standardize and template Kubernetes application deployments.",
+        "Built and maintained Jenkins automated pipelines; configured Terraform remote state locking with AWS S3 & DynamoDB.",
+        "Implemented Kubernetes Ingress for unified routing, provisioned EKS worker nodes, and integrated Kafka & ELK Stack logging.",
+      ],
+      skills: ["React", "Tailwind CSS", "Laravel Blade", "Kubernetes", "Helm", "ArgoCD", "Terraform", "Jenkins", "Kafka", "ELK"],
+    },
+    {
+      role: "Frontend Developer / Software & DevOps Engineer",
+      company: "Axelerant Technologies Private Limited",
+      period: "Dec 2021 – Nov 2024",
+      location: "Remote",
+      metrics: "18+ enterprise WordPress to Drupal migrations with 100% WCAG AA compliance",
+      bullets: [
+        "Led enterprise platform engineering across client accounts including British Business Bank, LADWP, Institute of Physics, Jewelers Mutual, and Axelerant's internal OZONE MDM (Mobile Device Management) platform.",
+        "Designed and maintained shared UI component libraries using Storybook, accelerating reusable feature development.",
+        "Delivered WCAG-compliant accessible interfaces using semantic HTML and ARIA while improving Core Web Vitals (LCP, CLS, INP).",
+        "Containerized services using Docker and supported deployment pipelines, fostering infrastructure-aware practices.",
+        "Contributed to architectural decisions, code reviews, and production releases in collaborative Agile sprints.",
+      ],
+      skills: ["React", "Next.js", "Drupal 10", "Acquia Site Studio", "Storybook", "Docker", "SCSS", "WCAG AA"],
+    },
+    {
+      role: "Web Developer / Academic Assistant",
+      company: "CSIR – Indian Institute of Integrative Medicine",
+      period: "Oct 2020 – Dec 2021",
+      location: "Srinagar, India",
+      metrics: "Institutional web systems & scientific academic platforms",
+      bullets: [
+        "Supported responsibilities spanning web development and academic assistance within the scientific institute environment.",
+        "Applied web development capabilities to support institutional and academic data management requirements.",
+      ],
+      skills: ["JavaScript", "Web Technology", "Database Management", "Academic Operations"],
+    },
+    {
+      role: "Web Developer",
+      company: "Mindgates Softtech Solutions Private Limited",
+      period: "Nov 2018 – Oct 2020",
+      location: "Srinagar, India",
+      metrics: "Student management system cutting processing time by 50%",
+      bullets: [
+        "Built and maintained applications using ASP.NET, PHP, MySQL, HTML, CSS, and JavaScript for client environments.",
+        "Developed a PHP-MySQL student management system, reducing manual processing time by 50% and improving efficiency.",
+        "Delivered customised websites and web solutions balancing UI/UX quality, performance, and reliability.",
+      ],
+      skills: ["PHP", "MySQL", "ASP.NET", "JavaScript", "HTML5", "CSS3"],
+    },
+  ],
+  skillsMatrix: {
+    "Frontend Engineering": [
+      "React.js",
+      "Next.js",
+      "TypeScript",
+      "JavaScript (ES6+)",
+      "Tailwind CSS",
+      "HTML5 / CSS3 / SCSS",
+      "Ant Design",
+      "Component-Driven UI",
+      "Core Web Vitals",
+      "WCAG & A11y",
+    ],
+    "Headless CMS & Architecture": [
+      "Drupal 10 / 11",
+      "Single Directory Components (SDC)",
+      "Twig Templating",
+      "Laravel Blade",
+      "Acquia Site Studio",
+      "REST APIs & GraphQL",
+      "PHP & Laravel",
+      "Node.js & MySQL",
+    ],
+    "Cloud & DevOps (AWS)": [
+      "AWS (EC2, VPC, IAM, S3, Route 53, ALB/NLB, EKS, ECS)",
+      "Docker Containerization",
+      "Kubernetes & Pods/Services",
+      "Helm Charting",
+      "ArgoCD (GitOps)",
+      "Terraform & Ansible (IaC)",
+      "CI/CD (Jenkins, GitHub Actions, GitLab CI, Gradle)",
+    ],
+    "Observability & Testing": [
+      "ELK Stack",
+      "DataDog",
+      "CloudWatch",
+      "Apache Kafka",
+      "Jest & React Testing Library",
+      "Linux Administration & Bash",
+      "Git & Branching Workflows",
+    ],
+  },
+  explorations: [
+    { title: "Kubernetes Ingress Gateway", category: "Cloud Architecture", url: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800" },
+    { title: "Decoupled Headless Mesh", category: "Next.js + Drupal", url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800" },
+    { title: "GitOps Delivery Engine", category: "ArgoCD / Helm", url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800" },
+    { title: "Event-Driven Stream", category: "Kafka & Microservices", url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=800" },
+    { title: "Telemetry & Logs HUD", category: "DataDog / ELK", url: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800" },
+    { title: "Design Token Library", category: "Storybook Studio", url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=800" },
+  ],
+  certifications: [
+    { name: "Meta Front-End Developer Specialization", issuer: "Meta / Coursera", year: "Certified" },
+    { name: "Acquia Site Studio Certification", issuer: "Acquia / Drupal", year: "Certified" },
+    { name: "JavaScript & TypeScript Certification", issuer: "Udemy", year: "Certified" },
+  ],
+};
