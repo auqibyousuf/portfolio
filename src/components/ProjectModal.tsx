@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import type { ProjectItem } from "../data/portfolioData";
 import { X, ExternalLink, Cpu, Zap, Users2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,17 +9,42 @@ interface ProjectModalProps {
 }
 
 export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
+    if (!project) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const focusable = () =>
+      Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      );
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusable();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
-    if (project) {
-      document.body.style.overflow = "hidden";
-      window.addEventListener("keydown", handleKeyDown);
-    }
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    dialogRef.current?.focus();
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus?.();
     };
   }, [project, onClose]);
 
@@ -39,12 +64,17 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
         />
 
         <motion.div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={project.title}
+          tabIndex={-1}
           initial={{ opacity: 0, scale: 0.94, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 20 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] p-6 sm:p-8 md:p-10 shadow-2xl text-[hsl(var(--text))] z-10 custom-scrollbar font-mono"
+          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[hsl(var(--surface))] border border-[hsl(var(--stroke))] p-6 sm:p-8 md:p-10 shadow-2xl text-[hsl(var(--text))] z-10 custom-scrollbar outline-none font-mono"
         >
           <button
             onClick={onClose}

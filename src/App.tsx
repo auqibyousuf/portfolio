@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { motion, AnimatePresence, useScroll, useTransform, MotionConfig } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "@studio-freight/lenis";
@@ -7,14 +7,19 @@ import {
   PORTFOLIO_DATA,
   type ProjectItem,
 } from "./data/portfolioData";
-import {
-  CinematicBackground,
-  type BackgroundMode,
-} from "./components/CinematicBackground";
+import type { BackgroundMode } from "./components/CinematicBackground";
 import { ModeSwitcher } from "./components/ModeSwitcher";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { ProjectModal } from "./components/ProjectModal";
-import { DecoupledVisualizer } from "./components/DecoupledVisualizer";
+
+const CinematicBackground = lazy(() =>
+  import("./components/CinematicBackground").then((m) => ({ default: m.CinematicBackground }))
+);
+const ProjectModal = lazy(() =>
+  import("./components/ProjectModal").then((m) => ({ default: m.ProjectModal }))
+);
+const DecoupledVisualizer = lazy(() =>
+  import("./components/DecoupledVisualizer").then((m) => ({ default: m.DecoupledVisualizer }))
+);
 import {
   ArrowUpRight,
   Sparkles,
@@ -54,6 +59,7 @@ function LinkedinIcon({ className = "w-4 h-4" }: { className?: string }) {
 // ─── Smooth Lenis Scroll Initialization ─────────────────────────────────────
 let lenisInstance: Lenis | null = null;
 function initSmoothScroll() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   lenisInstance = new Lenis({
     duration: 1.25,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -651,7 +657,9 @@ function ArchitectureSection() {
         </p>
       </div>
 
-      <DecoupledVisualizer />
+      <Suspense fallback={null}>
+        <DecoupledVisualizer />
+      </Suspense>
     </section>
   );
 }
@@ -1124,16 +1132,21 @@ export default function App() {
   }, [loading]);
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="bg-[hsl(var(--bg))] text-[hsl(var(--text))] min-h-screen relative w-full overflow-x-hidden transition-colors duration-300">
-      <CinematicBackground mode={bgMode} />
+      <Suspense fallback={null}>
+        <CinematicBackground mode={bgMode} />
+      </Suspense>
       <TopNavBar />
       <CustomPointer />
       <ModeSwitcher currentMode={bgMode} onModeChange={setBgMode} />
 
-      <ProjectModal
-        project={selectedProject}
-        onClose={() => setSelectedProject(null)}
-      />
+      <Suspense fallback={null}>
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      </Suspense>
 
       <AnimatePresence>
         {loading && <IntroLoader onComplete={() => setLoading(false)} />}
@@ -1151,5 +1164,6 @@ export default function App() {
         </main>
       )}
     </div>
+    </MotionConfig>
   );
 }
