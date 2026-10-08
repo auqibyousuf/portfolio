@@ -223,3 +223,11 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* With the 3D backdrop active, let section cards be translucent so the scene reads through them. */
+.iso3d .bg-\[hsl\(var\(--surface\)\)\] {
+  background-color: hsl(var(--surface) / 0.62) !important;
+}
+.iso3d #skills .bg-\[hsl\(var\(--surface\)\)\] {
+  background-color: hsl(var(--surface) / 0.82) !important;
+}

@@ -401,7 +401,7 @@ function HeroSection() {
   }, []);
 
   return (
-    <section className="min-h-screen w-full flex flex-col justify-between relative pt-32 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 select-none font-mono">
+    <section id="hero" className="min-h-screen w-full flex flex-col justify-between relative pt-32 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 select-none font-mono">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1137,7 +1137,7 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className="bg-[hsl(var(--bg))] text-[hsl(var(--text))] min-h-screen relative w-full overflow-x-clip transition-colors duration-300">
+    <div className={`${show3DWorks ? "iso3d " : ""}bg-[hsl(var(--bg))] text-[hsl(var(--text))] min-h-screen relative w-full overflow-x-clip transition-colors duration-300`}>
       <Suspense fallback={null}>
         <CinematicBackground mode={bgMode} />
       </Suspense>
