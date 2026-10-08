@@ -1,52 +1,76 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrthographicCamera } from "@react-three/drei";
+import { OrthographicCamera, RoundedBox, Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 import { ArrowUpRight } from "lucide-react";
 import { PORTFOLIO_DATA, type ProjectItem } from "../../data/portfolioData";
 import { useScrollProgress } from "./useScrollProgress";
+import { Monitor, Laptop, Phone, ServerRack, Cloud, Shadowed } from "./models";
 
-const SPACING = 3.2;
+const SPACING = 3.8;
 const COLORS = ["#38bdf8", "#6366f1", "#22d3ee", "#a78bfa", "#34d399"];
 
-function Block({ index, active, color }: { index: number; active: React.RefObject<number>; color: string }) {
-  const mesh = useRef<THREE.Mesh>(null);
+type Kind = "monitor" | "laptop" | "phone" | "rack" | "cloud";
+function kindOf(p: ProjectItem): Kind {
+  const c = p.category.toLowerCase();
+  if (c.includes("mobile")) return "phone";
+  if (c.includes("infrastructure") || c.includes("code")) return "rack";
+  if (c.includes("observability") || c.includes("cloud")) return "cloud";
+  if (c.includes("platform") || c.includes("portal") || c.includes("banking")) return "monitor";
+  return "laptop";
+}
+
+function Prop({ kind, color, seed }: { kind: Kind; color: string; seed: number }) {
+  switch (kind) {
+    case "monitor": return <group scale={0.95}><Monitor seed={seed} accent={color} /></group>;
+    case "phone": return <Phone seed={seed} accent={color} scale={1.1} />;
+    case "rack": return <ServerRack scale={0.8} accent={color} />;
+    case "cloud": return <group position={[0, 1.2, 0]}><Cloud scale={1} /></group>;
+    default: return <group scale={1.1}><Laptop seed={seed} accent={color} /></group>;
+  }
+}
+
+function Exhibit({ index, active, kind, color }: { index: number; active: React.RefObject<number>; kind: Kind; color: string }) {
+  const g = useRef<THREE.Group>(null);
   const mat = useRef<THREE.MeshStandardMaterial>(null);
   useFrame((_, dt) => {
-    const m = mesh.current;
-    if (!m || !mat.current) return;
-    // 1 when this block is under the camera, fading to 0 one slot away.
+    if (!g.current || !mat.current) return;
+    // 1 when this exhibit is under the camera, fading to 0 one slot away.
     const focus = Math.max(0, 1 - Math.abs(active.current - index));
-    const h = 1 + focus * 1.8;
-    m.scale.y = THREE.MathUtils.damp(m.scale.y, h, 5, dt);
-    m.position.y = m.scale.y / 2;
-    m.rotation.y = THREE.MathUtils.damp(m.rotation.y, focus * Math.PI * 0.5, 4, dt);
-    mat.current.emissiveIntensity = THREE.MathUtils.damp(mat.current.emissiveIntensity, focus * 0.6, 5, dt);
+    g.current.position.y = THREE.MathUtils.damp(g.current.position.y, focus * 0.55, 5, dt);
+    g.current.scale.setScalar(THREE.MathUtils.damp(g.current.scale.x, 0.85 + focus * 0.25, 5, dt));
+    g.current.rotation.y = THREE.MathUtils.damp(g.current.rotation.y, (focus - 1) * 0.5, 4, dt);
+    mat.current.emissiveIntensity = THREE.MathUtils.damp(mat.current.emissiveIntensity, 0.15 + focus * 0.9, 5, dt);
   });
   return (
-    <mesh ref={mesh} position={[index * SPACING, 0.5, 0]}>
-      <boxGeometry args={[1.8, 1, 1.8]} />
-      <meshStandardMaterial ref={mat} color={color} emissive={color} emissiveIntensity={0} metalness={0.3} roughness={0.4} />
-    </mesh>
+    <group position={[index * SPACING, 0, 0]}>
+      <group ref={g}>
+        <RoundedBox args={[2.8, 0.3, 2.8]} radius={0.1} smoothness={4} position={[0, 0.15, 0]}>
+          <meshStandardMaterial color="#e2e8f0" roughness={0.5} />
+        </RoundedBox>
+        <RoundedBox args={[2.84, 0.08, 2.84]} radius={0.04} position={[0, 0.04, 0]}>
+          <meshStandardMaterial ref={mat} color={color} emissive={color} emissiveIntensity={0.15} toneMapped={false} />
+        </RoundedBox>
+        <group position={[0, 0.3, 0]} rotation={[0, 0.2, 0]}>
+          <Prop kind={kind} color={color} seed={index + 1} />
+        </group>
+      </group>
+    </group>
   );
 }
 
 function Rig({ active, count }: { active: React.RefObject<number>; count: number }) {
-  const track = useRef(new THREE.Vector3());
+  const x = useRef(0);
   useFrame(({ camera }, dt) => {
-    // Camera glides along the row so the active block stays centred.
-    const x = active.current * SPACING;
-    track.current.x = THREE.MathUtils.damp(track.current.x, x, 6, dt);
-    camera.position.set(track.current.x + 10, 10, 10);
-    camera.lookAt(track.current.x, -0.4, 0);
+    // Camera glides along the row so the active exhibit stays centred.
+    x.current = THREE.MathUtils.damp(x.current, active.current * SPACING, 6, dt);
+    camera.position.set(x.current + 10, 9, 10);
+    camera.lookAt(x.current, 0.4, 0);
   });
   return (
-    <>
-      <mesh position={[((count - 1) * SPACING) / 2, -0.05, 0]}>
-        <boxGeometry args={[count * SPACING + 4, 0.1, 5]} />
-        <meshStandardMaterial color="#64748b" transparent opacity={0.35} metalness={0.2} roughness={0.8} />
-      </mesh>
-    </>
+    <RoundedBox args={[count * SPACING + 4, 0.1, 4.6]} radius={0.04} position={[((count - 1) * SPACING) / 2, -0.06, 0]} receiveShadow>
+      <meshStandardMaterial color="#cbd5e1" transparent opacity={0.55} roughness={0.8} />
+    </RoundedBox>
   );
 }
 
@@ -54,8 +78,8 @@ export const IsoWorks: React.FC<{ onSelectProject: (p: ProjectItem) => void }> =
   const projects = PORTFOLIO_DATA.projects;
   const wrapper = useRef<HTMLDivElement>(null);
   const progress = useScrollProgress(wrapper, "sticky");
-  const active = useRef(0); // float index, read by the 3D scene
-  const [index, setIndex] = useState(0); // integer index, drives the overlay
+  const active = useRef(0);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     let raf = 0;
@@ -74,15 +98,21 @@ export const IsoWorks: React.FC<{ onSelectProject: (p: ProjectItem) => void }> =
   return (
     <section id="works" ref={wrapper} style={{ height: `${projects.length * 70 + 100}vh` }} className="relative font-mono">
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        <Canvas dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }}>
-          <OrthographicCamera makeDefault zoom={42} near={0.1} far={100} position={[10, 10, 10]} />
-          <ambientLight intensity={0.7} />
-          <directionalLight position={[6, 12, 4]} intensity={1.4} />
-          <pointLight position={[-4, 5, -6]} intensity={25} color="#6366f1" />
+        <Canvas shadows dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }}>
+          <OrthographicCamera makeDefault zoom={60} near={0.1} far={100} position={[10, 9, 10]} />
+          <ambientLight intensity={0.35} />
+          <directionalLight position={[6, 12, 5]} intensity={2.2} castShadow shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-12} shadow-camera-right={12} shadow-camera-top={8} shadow-camera-bottom={-8} shadow-bias={-0.0004} />
+          <Environment resolution={128} frames={1}>
+            <Lightformer form="rect" intensity={2.5} position={[0, 6, 4]} scale={[10, 4, 1]} />
+            <Lightformer form="rect" intensity={1.2} color="#6366f1" position={[-6, 2, -3]} scale={[6, 4, 1]} />
+          </Environment>
           <Rig active={active} count={projects.length} />
-          {projects.map((p, i) => (
-            <Block key={p.id} index={i} active={active} color={COLORS[i % COLORS.length]} />
-          ))}
+          <Shadowed>
+            {projects.map((p, i) => (
+              <Exhibit key={p.id} index={i} active={active} kind={kindOf(p)} color={COLORS[i % COLORS.length]} />
+            ))}
+          </Shadowed>
         </Canvas>
 
         <div className="absolute top-24 left-6 sm:left-12 right-6 pointer-events-none">
