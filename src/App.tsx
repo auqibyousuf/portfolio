@@ -15,7 +15,7 @@ import { ThemeToggle } from "./components/ThemeToggle";
 const CinematicBackground = lazy(() =>
   import("./components/CinematicBackground").then((m) => ({ default: m.CinematicBackground }))
 );
-const IsoHero = lazy(() => import("./components/iso/IsoHero"));
+const IsoBackdrop = lazy(() => import("./components/iso/IsoBackdrop"));
 const IsoWorks = lazy(() => import("./components/iso/IsoWorks"));
 const ProjectModal = lazy(() =>
   import("./components/ProjectModal").then((m) => ({ default: m.ProjectModal }))
@@ -377,8 +377,6 @@ function IntroLoader({ onComplete }: { onComplete: () => void }) {
 // 2. HERO SECTION
 // ════════════════════════════════════════════════════════════════════════════
 function HeroSection() {
-  const heroRef = useRef<HTMLElement>(null);
-  const [show3D] = useState(() => hasWebGL() && !prefersReducedMotion());
   const [localTime, setLocalTime] = useState("");
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 800], [0, 60]);
@@ -403,14 +401,7 @@ function HeroSection() {
   }, []);
 
   return (
-    <section ref={heroRef} className="min-h-screen w-full flex flex-col justify-between relative pt-32 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 select-none font-mono">
-      {show3D && (
-        <div className="absolute inset-y-0 right-0 w-full lg:w-[55%] -z-10 pointer-events-none opacity-40 lg:opacity-90" aria-hidden="true">
-          <Suspense fallback={null}>
-            <IsoHero container={heroRef} />
-          </Suspense>
-        </div>
-      )}
+    <section className="min-h-screen w-full flex flex-col justify-between relative pt-32 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 select-none font-mono">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1150,6 +1141,11 @@ export default function App() {
       <Suspense fallback={null}>
         <CinematicBackground mode={bgMode} />
       </Suspense>
+      {show3DWorks && (
+        <Suspense fallback={null}>
+          <IsoBackdrop />
+        </Suspense>
+      )}
       <TopNavBar />
       <CustomPointer />
       <ModeSwitcher currentMode={bgMode} onModeChange={setBgMode} />

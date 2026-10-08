@@ -10,6 +10,15 @@ import { Monitor, Laptop, Phone, ServerRack, Cloud, Shadowed } from "./models";
 const SPACING = 3.8;
 const COLORS = ["#38bdf8", "#6366f1", "#22d3ee", "#a78bfa", "#34d399"];
 
+// Three-tone colour blocks that wipe between projects.
+const BLOCKS: [string, string, string][] = [
+  ["#38bdf8", "#1e293b", "#6366f1"],
+  ["#f97316", "#1e293b", "#84a98c"],
+  ["#6366f1", "#0f766e", "#e2e8f0"],
+  ["#10b981", "#334155", "#f59e0b"],
+  ["#ec4899", "#1e293b", "#38bdf8"],
+];
+
 type Kind = "monitor" | "laptop" | "phone" | "rack" | "cloud";
 function kindOf(p: ProjectItem): Kind {
   const c = p.category.toLowerCase();
@@ -46,7 +55,7 @@ function Exhibit({ index, active, kind, color }: { index: number; active: React.
     <group position={[index * SPACING, 0, 0]}>
       <group ref={g}>
         <RoundedBox args={[2.8, 0.3, 2.8]} radius={0.1} smoothness={4} position={[0, 0.15, 0]}>
-          <meshStandardMaterial color="#e2e8f0" roughness={0.5} />
+          <meshPhysicalMaterial color="#f1f5f9" roughness={0.25} clearcoat={1} clearcoatRoughness={0.1} />
         </RoundedBox>
         <RoundedBox args={[2.84, 0.08, 2.84]} radius={0.04} position={[0, 0.04, 0]}>
           <meshStandardMaterial ref={mat} color={color} emissive={color} emissiveIntensity={0.15} toneMapped={false} />
@@ -98,6 +107,11 @@ export const IsoWorks: React.FC<{ onSelectProject: (p: ProjectItem) => void }> =
   return (
     <section id="works" ref={wrapper} style={{ height: `${projects.length * 70 + 100}vh` }} className="relative font-mono">
       <div className="sticky top-0 h-screen w-full overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-25 dark:opacity-30" aria-hidden="true">
+          <div className="absolute left-0 top-0 h-full w-[34%] transition-colors duration-700" style={{ background: BLOCKS[index % BLOCKS.length][0] }} />
+          <div className="absolute right-0 top-0 h-[55%] w-[34%] transition-colors duration-700 delay-100" style={{ background: BLOCKS[index % BLOCKS.length][1] }} />
+          <div className="absolute right-0 bottom-0 h-[45%] w-[34%] transition-colors duration-700 delay-200" style={{ background: BLOCKS[index % BLOCKS.length][2] }} />
+        </div>
         <Canvas shadows dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }}>
           <OrthographicCamera makeDefault zoom={60} near={0.1} far={100} position={[10, 9, 10]} />
           <ambientLight intensity={0.35} />
@@ -120,13 +134,21 @@ export const IsoWorks: React.FC<{ onSelectProject: (p: ProjectItem) => void }> =
           <h2 className="text-3xl sm:text-5xl font-bold text-[hsl(var(--text))] leading-tight">Featured Projects</h2>
         </div>
 
-        <div className="absolute bottom-8 left-6 right-6 sm:left-12 sm:right-auto sm:max-w-md rounded-2xl bg-[hsl(var(--surface))]/90 backdrop-blur border border-[hsl(var(--stroke))] p-5 sm:p-6 shadow-2xl">
+        <div className="absolute bottom-8 left-6 right-6 sm:left-12 sm:right-auto sm:max-w-md rounded-3xl bg-white/25 dark:bg-white/10 backdrop-blur-2xl border border-white/40 dark:border-white/15 p-5 sm:p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)]">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-[hsl(var(--muted))] mb-3">
             <span>SYS.{String(index + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}</span>
             <span>{project.category}</span>
           </div>
           <h3 className="text-lg sm:text-xl font-bold text-[hsl(var(--text))] mb-1">{project.title}</h3>
           <p className="text-xs text-[hsl(var(--muted))] leading-relaxed font-sans mb-4">{project.tagline}</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {project.stats.slice(0, 3).map((st) => (
+              <div key={st.label} className="rounded-xl bg-white/40 dark:bg-white/10 border border-white/40 dark:border-white/10 px-3 py-1.5">
+                <div className="text-sm font-bold text-[hsl(var(--text))] leading-none">{st.value}</div>
+                <div className="text-[9px] uppercase tracking-wider text-[hsl(var(--muted))] mt-1">{st.label}</div>
+              </div>
+            ))}
+          </div>
           <button
             onClick={() => onSelectProject(project)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-[hsl(var(--text))] text-[hsl(var(--bg))] hover:opacity-85 transition-opacity cursor-pointer"
