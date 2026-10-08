@@ -52,7 +52,7 @@ html, body, #root {
   background-color: hsl(var(--bg)) !important;
   color: hsl(var(--text)) !important;
   font-family: 'JetBrains Mono', monospace !important;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

@@ -7,6 +7,7 @@ import {
   PORTFOLIO_DATA,
   type ProjectItem,
 } from "./data/portfolioData";
+import { hasWebGL, prefersReducedMotion } from "./components/iso/useScrollProgress";
 import type { BackgroundMode } from "./components/CinematicBackground";
 import { ModeSwitcher } from "./components/ModeSwitcher";
 import { ThemeToggle } from "./components/ThemeToggle";
@@ -14,6 +15,8 @@ import { ThemeToggle } from "./components/ThemeToggle";
 const CinematicBackground = lazy(() =>
   import("./components/CinematicBackground").then((m) => ({ default: m.CinematicBackground }))
 );
+const IsoHero = lazy(() => import("./components/iso/IsoHero"));
+const IsoWorks = lazy(() => import("./components/iso/IsoWorks"));
 const ProjectModal = lazy(() =>
   import("./components/ProjectModal").then((m) => ({ default: m.ProjectModal }))
 );
@@ -374,6 +377,8 @@ function IntroLoader({ onComplete }: { onComplete: () => void }) {
 // 2. HERO SECTION
 // ════════════════════════════════════════════════════════════════════════════
 function HeroSection() {
+  const heroRef = useRef<HTMLElement>(null);
+  const [show3D] = useState(() => hasWebGL() && !prefersReducedMotion());
   const [localTime, setLocalTime] = useState("");
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 800], [0, 60]);
@@ -398,7 +403,14 @@ function HeroSection() {
   }, []);
 
   return (
-    <section className="min-h-screen w-full flex flex-col justify-between relative pt-32 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 select-none font-mono">
+    <section ref={heroRef} className="min-h-screen w-full flex flex-col justify-between relative pt-32 pb-12 px-6 sm:px-12 max-w-[1300px] mx-auto z-10 select-none font-mono">
+      {show3D && (
+        <div className="absolute inset-y-0 right-0 w-full lg:w-[55%] -z-10 pointer-events-none opacity-40 lg:opacity-90" aria-hidden="true">
+          <Suspense fallback={null}>
+            <IsoHero container={heroRef} />
+          </Suspense>
+        </div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1122,6 +1134,7 @@ function ContactSection() {
 // ════════════════════════════════════════════════════════════════════════════
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [show3DWorks] = useState(() => hasWebGL() && !prefersReducedMotion());
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [bgMode, setBgMode] = useState<BackgroundMode>("cinematic-video");
 
@@ -1133,7 +1146,7 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className="bg-[hsl(var(--bg))] text-[hsl(var(--text))] min-h-screen relative w-full overflow-x-hidden transition-colors duration-300">
+    <div className="bg-[hsl(var(--bg))] text-[hsl(var(--text))] min-h-screen relative w-full overflow-x-clip transition-colors duration-300">
       <Suspense fallback={null}>
         <CinematicBackground mode={bgMode} />
       </Suspense>
@@ -1155,7 +1168,13 @@ export default function App() {
       {!loading && (
         <main className="relative z-10">
           <HeroSection />
-          <WorksShowcase onSelectProject={setSelectedProject} />
+          {show3DWorks ? (
+            <Suspense fallback={<WorksShowcase onSelectProject={setSelectedProject} />}>
+              <IsoWorks onSelectProject={setSelectedProject} />
+            </Suspense>
+          ) : (
+            <WorksShowcase onSelectProject={setSelectedProject} />
+          )}
           <ArchitectureSection />
           <SkillsSection />
           <CareerTimeline />
