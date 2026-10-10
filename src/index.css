@@ -2,213 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Light Mode Defaults (Clean Crisp Titanium) ── */
-:root, [data-theme="light"] {
-  --bg: 215 25% 97%;
-  --surface: 215 20% 92%;
-  --text: 222 35% 10%;
-  --muted: 217 16% 40%;
-  --stroke: 215 20% 82%;
-  --accent-a: #2563eb;
-  --accent-b: #0ea5e9;
-  --grain-opacity: 0.015;
-  --overlay-bg: rgba(255, 255, 255, 0.88);
-  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+/* Lexend is shipped with the ThreeUI Sylva hero; the whole site reuses that exact file. */
+@font-face {
+  font-family: "Lexend";
+  src: url("/landing-pages/inner-green-assets/lexend-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
-/* ─── Dark Mode (Deep Cyber Titanium & Midnight Sapphire) ── */
-.dark, [data-theme="dark"] {
-  --bg: 222 25% 5%;
-  --surface: 222 22% 8.5%;
-  --text: 210 25% 98%;
-  --muted: 215 16% 62%;
-  --stroke: 222 18% 16%;
-  --accent-a: #38bdf8;
-  --accent-b: #6366f1;
-  --grain-opacity: 0.025;
-  --overlay-bg: rgba(8, 12, 20, 0.88);
-  --card-shadow: 0 14px 45px -10px rgba(0, 0, 0, 0.7);
+:root {
+  color-scheme: dark;
+  --bg: #09110c;
 }
 
-/* ─── Auto System Preference fallback when no explicit data-theme is set ── */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: 222 25% 5%;
-    --surface: 222 22% 8.5%;
-    --text: 210 25% 98%;
-    --muted: 215 16% 62%;
-    --stroke: 222 18% 16%;
-    --accent-a: #38bdf8;
-    --accent-b: #6366f1;
-    --grain-opacity: 0.025;
-    --overlay-bg: rgba(8, 12, 20, 0.88);
-    --card-shadow: 0 14px 45px -10px rgba(0, 0, 0, 0.7);
-  }
-}
+* { box-sizing: border-box; }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body, #root {
-  background-color: hsl(var(--bg)) !important;
-  color: hsl(var(--text)) !important;
-  font-family: 'JetBrains Mono', monospace !important;
-  overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+html { scroll-behavior: smooth; background: var(--bg); }
 
 body {
-  background-color: hsl(var(--bg));
-  color: hsl(var(--text));
+  margin: 0;
+  background: var(--bg);
+  color: #eef2e6;
+  font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-::selection {
-  background: rgba(37, 99, 235, 0.3);
-  color: hsl(var(--text));
-}
+::selection { background: #cfe8b4; color: #09110c; }
 
-/* ─── Accent gradient ───────────────────────── */
-.accent-gradient { background: linear-gradient(135deg, var(--accent-a) 0%, var(--accent-b) 100%); }
-.accent-gradient-text {
-  background: linear-gradient(135deg, var(--accent-a) 0%, var(--accent-b) 50%, #38bdf8 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
+:focus-visible { outline: 2px solid #cfe8b4; outline-offset: 3px; border-radius: 6px; }
 
-/* ─── Ambient cursor glow ───────────────────── */
-.cursor-glow {
-  pointer-events: none; position: fixed; z-index: 1;
-  width: 650px; height: 650px; border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(78,133,191,0.08) 0%, rgba(137,170,204,0.03) 45%, transparent 70%);
-  transform: translate(-50%,-50%); will-change: transform;
-}
-
-/* ─── Custom cursor (Original Clean Circular Ring & Dot) ── */
-.cursor-dot, .cursor-ring {
-  pointer-events: none; position: fixed; top: 0; left: 0;
-  z-index: 99999; border-radius: 50%; will-change: transform;
-}
-.cursor-dot {
-  width: 5px; height: 5px;
-  background: white;
-  mix-blend-mode: difference;
-}
-.cursor-ring {
-  width: 32px; height: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  mix-blend-mode: difference;
-  transition: width .2s cubic-bezier(0.16, 1, 0.3, 1), height .2s cubic-bezier(0.16, 1, 0.3, 1), border-color .2s;
-}
-.cursor-ring.hover {
-  width: 56px; height: 56px;
-  border-color: rgba(255, 255, 255, 0.85);
-}
-.cursor-ring.click {
-  width: 24px; height: 24px;
-  opacity: 0.5;
-}
-
-/* ─── Scroll progress ───────────────────────── */
-.scroll-progress-bar {
-  position: fixed; top: 0; left: 0; height: 2px; width: 100%;
-  background: linear-gradient(90deg, var(--accent-a), var(--accent-b), #818cf8);
-  z-index: 9999; transform-origin: left; transform: scaleX(0);
-}
-
-/* ─── Grain & Scanlines ─────────────────────── */
-.grain-overlay {
-  position: fixed; inset: -200%; width: 400%; height: 400%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: var(--grain-opacity); pointer-events: none; z-index: 99998;
-  animation: grain .35s steps(1) infinite;
-}
-@keyframes grain {
-  0%  { transform: translate(0,0); }   14% { transform: translate(-2%,-3%); }
-  28% { transform: translate(3%,2%); } 42% { transform: translate(-1%,4%); }
-  57% { transform: translate(4%,-1%); }71% { transform: translate(-3%,1%); }
-  85% { transform: translate(1%,-4%); }100%{ transform: translate(-4%,3%); }
-}
-
-.scanline-overlay {
-  position: fixed; inset: 0; width: 100%; height: 100%;
-  background: linear-gradient(to bottom, transparent, transparent 50%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.08));
-  background-size: 100% 4px; pointer-events: none; z-index: 99997; opacity: 0.2;
-}
-
-/* ─── Halftone & Vignette ────────────────────── */
-.bg-radial-vignette {
-  background: radial-gradient(circle at center, transparent 40%, hsl(var(--bg)) 100%);
-}
-.bg-radial-spotlight {
-  background: radial-gradient(circle at 50% 30%, rgba(78, 133, 191, 0.06) 0%, transparent 60%);
-}
-
-.halftone-overlay {
-  background-image: radial-gradient(circle, rgba(120,120,120,.12) 1px, transparent 1px);
-  background-size: 6px 6px;
-}
-
-/* ─── Scroll indicator ──────────────────────── */
-@keyframes scroll-down {
-  0%   { transform: translateY(-100%); opacity: 0; }
-  50%  { opacity: 1; }
-  100% { transform: translateY(200%); opacity: 0; }
-}
-.animate-scroll-down { animation: scroll-down 1.5s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
-
-/* ─── Volumetric Orbs (Original Subtle Atmospheric Glow) ── */
-.orb {
-  position: absolute; border-radius: 50%;
-  filter: blur(100px); pointer-events: none;
-}
-.orb-1 {
-  width: 70vw; height: 70vw; opacity: .16;
-  background: radial-gradient(circle, var(--accent-b) 0%, transparent 65%);
-  top: -25%; left: -12%;
-  animation: orb-a 22s ease-in-out infinite;
-}
-.orb-2 {
-  width: 60vw; height: 60vw; opacity: .12;
-  background: radial-gradient(circle, var(--accent-a) 0%, transparent 65%);
-  bottom: -15%; right: -8%;
-  animation: orb-b 28s ease-in-out infinite;
-}
-.orb-3 {
-  width: 40vw; height: 40vw; opacity: .09;
-  background: radial-gradient(circle, var(--accent-b) 0%, transparent 70%);
-  top: 35%; left: 45%;
-  animation: orb-c 18s ease-in-out infinite;
-}
-@keyframes orb-a {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33%     { transform: translate(8%,6%) scale(1.08); }
-  66%     { transform: translate(-4%,10%) scale(.94); }
-}
-@keyframes orb-b {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33%     { transform: translate(-6%,-8%) scale(1.1); }
-  66%     { transform: translate(5%,-3%) scale(.96); }
-}
-@keyframes orb-c {
-  0%,100% { transform: translate(0,0) scale(1); }
-  50%     { transform: translate(-10%,6%) scale(1.12); }
-}
-
-/* ─── 3D card tilt ──────────────────────────── */
-.card-3d { transform-style: preserve-3d; }
-
-/* ─── Custom Scrollbar ──────────────────────── */
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: hsl(var(--stroke)); border-radius: 9999px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted)); }
-
-/* ─── Laser timeline line ───────────────────── */
-.laser-glow {
-  box-shadow: 0 0 16px rgba(37, 99, 235, 0.5), 0 0 32px rgba(2, 132, 199, 0.3);
-}
-
-@media (prefers-color-scheme: dark) {
-  .laser-glow {
-    box-shadow: 0 0 16px rgba(137, 170, 204, 0.75), 0 0 32px rgba(78, 133, 191, 0.45);
+@layer components {
+  .eyebrow {
+    @apply text-[11px] uppercase tracking-[0.28em] text-leaf font-normal;
+  }
+  .section-title {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight leading-[1.05] text-ink;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-line px-3 py-1 text-xs text-ink/80 bg-white/[0.03];
   }
 }
 
+@keyframes marquee-left { to { transform: translateX(-50%); } }
+@keyframes marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.marquee-track { display: flex; width: max-content; animation: marquee-left 60s linear infinite; }
+.marquee-track.reverse { animation-name: marquee-right; animation-duration: 75s; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .marquee-track { animation: none; }
+}

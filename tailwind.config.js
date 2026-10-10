@@ -1,28 +1,22 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  darkMode: ["class", '[data-theme="dark"]'],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"JetBrains Mono"', 'monospace'],
-        display: ['"JetBrains Mono"', 'monospace'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        sans: ['Lexend', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Lexend', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        bg: "hsl(var(--bg))",
-        surface: "hsl(var(--surface))",
-        "text-primary": "hsl(var(--text))",
-        muted: "hsl(var(--muted))",
-        stroke: "hsl(var(--stroke))",
-        accent: "hsl(var(--accent))",
+        bg: "#09110c",
+        moss: "#101b14",
+        ink: "#eef2e6",
+        mute: "#9db0a1",
+        leaf: "#cfe8b4",
+        bloom: "#f2c9d4",
+        line: "rgba(238,242,230,0.12)",
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate")
-  ],
-}
+  plugins: [],
+};
