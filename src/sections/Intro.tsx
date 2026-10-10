@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { animate, motion, useInView, useMotionValue, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { MapPin } from "lucide-react";
 import { PORTFOLIO_DATA } from "../data/portfolioData";
 import { GithubIcon, LinkedinIcon } from "../components/icons";
+import { SectionScene } from "../components/SectionScene";
 import { Reveal } from "../components/Reveal";
 
 function Word({ word, progress, range }: { word: string; progress: MotionValue<number>; range: [number, number] }) {
@@ -32,15 +33,59 @@ function Counter({ to, suffix }: { to: number; suffix: string }) {
   return <span ref={ref}>{`${to}${suffix}`}</span>;
 }
 
+function useIstClock() {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    const tick = () =>
+      setTime(new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: true }));
+    tick();
+    const id = window.setInterval(tick, 20000);
+    return () => window.clearInterval(id);
+  }, []);
+  return time;
+}
+
 export function Intro() {
   const p = PORTFOLIO_DATA.profile;
+  const clock = useIstClock();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.5"] });
   const words = p.bio.split(" ");
 
   return (
-    <section id="intro" className="relative z-10 bg-gradient-to-b from-bg/0 via-bg/80 to-bg/80 pt-28 sm:pt-40 pb-24 px-6 sm:px-12">
+    <section id="intro" className="overflow-hidden relative pt-32 sm:pt-36 pb-24 px-6 sm:px-12">
+      <SectionScene scene="constellation" strength={0.7} />
       <div className="mx-auto max-w-[1200px]">
+        <header className="min-h-[78svh] flex flex-col justify-center pb-20">
+          <Reveal>
+            <p className="inline-flex items-center gap-3 rounded-full border border-line bg-white/[0.04] px-4 py-2 text-xs text-ink/85">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inset-0 rounded-full bg-leaf opacity-60 animate-ping motion-reduce:animate-none" />
+                <span className="relative h-2 w-2 rounded-full bg-leaf" />
+              </span>
+              {p.availability}
+              <span className="hidden sm:inline h-3 w-px bg-line" />
+              <span className="hidden sm:inline tabular-nums text-mute">Bangalore {clock} IST</span>
+            </p>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <h1 className="mt-8 text-5xl sm:text-7xl lg:text-[6.5rem] font-light tracking-tight leading-[1.02] text-ink">
+              {p.name}
+            </h1>
+          </Reveal>
+          <Reveal delay={0.16}>
+            <p className="mt-6 text-xl sm:text-2xl font-light text-leaf">{p.title}</p>
+          </Reveal>
+          <Reveal delay={0.24} className="mt-10 flex flex-wrap items-center gap-3">
+            <a href="#work" className="rounded-full bg-ink px-7 py-3.5 text-sm text-bg transition-colors hover:bg-leaf">
+              View selected work
+            </a>
+            <a href="#architecture" className="rounded-full border border-line px-7 py-3.5 text-sm text-ink transition-colors hover:border-leaf hover:text-leaf">
+              Architecture sandbox
+            </a>
+          </Reveal>
+        </header>
+
         <Reveal>
           <p className="eyebrow mb-8">About</p>
         </Reveal>

@@ -10,7 +10,7 @@ export function Work({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
   const current = projects[active];
 
   return (
-    <section id="work" className="relative z-10 bg-bg/80 py-24 sm:py-32 px-6 sm:px-12">
+    <section id="work" className="relative py-24 sm:py-32 px-6 sm:px-12">
       <div className="mx-auto max-w-[1200px]">
         <Reveal className="mb-14 sm:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>

@@ -3,6 +3,7 @@ import { Check, Copy, Mail, Phone } from "lucide-react";
 import { MetalButton } from "../components/MetalButton";
 import { PORTFOLIO_DATA } from "../data/portfolioData";
 import { GithubIcon, LinkedinIcon } from "../components/icons";
+import { SectionScene } from "../components/SectionScene";
 import { Reveal } from "../components/Reveal";
 
 export function Contact() {
@@ -20,7 +21,8 @@ export function Contact() {
   };
 
   return (
-    <footer id="contact" className="relative z-10 bg-bg/85 pt-28 sm:pt-40 pb-10 px-6 sm:px-12 border-t border-line">
+    <footer id="contact" className="overflow-hidden relative pt-28 sm:pt-40 pb-10 px-6 sm:px-12 border-t border-line">
+      <SectionScene scene="horizon" strength={0.7} />
       <div className="mx-auto max-w-[1200px]">
         <Reveal>
           <p className="eyebrow mb-6">Contact</p>

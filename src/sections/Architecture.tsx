@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { MetalButton } from "../components/MetalButton";
+import { SectionScene } from "../components/SectionScene";
 import { Reveal } from "../components/Reveal";
 
 const STEPS = [
@@ -42,7 +43,8 @@ export function Architecture() {
   const step = STEPS[index];
 
   return (
-    <section id="architecture" className="relative z-10 bg-bg/80 py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
+    <section id="architecture" className="overflow-hidden relative py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
+      <SectionScene scene="infrastructure" strength={0.8} />
       <div className="mx-auto max-w-[1200px]">
         <Reveal className="mb-14 max-w-3xl">
           <p className="eyebrow mb-4">Engineering sandbox</p>
@@ -74,7 +76,7 @@ export function Architecture() {
                   className="relative flex w-full items-center gap-5 py-3 text-left cursor-pointer"
                 >
                   <span
-                    className={`relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border text-xs tabular-nums transition-colors ${
+                    className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-full border text-xs tabular-nums transition-colors ${
                       i <= index ? "border-leaf bg-leaf text-bg" : "border-line bg-bg text-mute"
                     }`}
                   >

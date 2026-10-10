@@ -10,17 +10,9 @@ const LINKS = [
   ["Credentials", "credentials"],
 ] as const;
 
-/** Floating pill nav. Hidden over the hero so it never collides with the hero's own navigation. */
+/** Floating pill nav. */
 export function Nav() {
-  const [shown, setShown] = useState(false);
   const [active, setActive] = useState("");
-
-  useEffect(() => {
-    const onScroll = () => setShown(window.scrollY > window.innerHeight * 0.75);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     const ids = [...LINKS.map(([, id]) => id), "contact"];
@@ -45,7 +37,7 @@ export function Nav() {
 
   return (
     <AnimatePresence>
-      {shown && (
+      {(
         <motion.nav
           aria-label="Primary"
           initial={{ y: -24, opacity: 0 }}
@@ -54,7 +46,7 @@ export function Nav() {
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-full border border-line bg-bg/70 backdrop-blur-xl px-2 py-2 shadow-[0_10px_40px_-12px_rgba(0,0,0,0.6)]"
         >
-          <a href="#hero" className="px-3 text-sm text-ink tracking-tight" aria-label="Back to top">
+          <a href="#intro" className="px-3 text-sm text-ink tracking-tight" aria-label="Back to top">
             {PORTFOLIO_DATA.profile.shortName}
           </a>
           <span className="hidden md:block h-4 w-px bg-line" />

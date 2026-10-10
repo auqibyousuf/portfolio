@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { PORTFOLIO_DATA } from "../data/portfolioData";
+import { SectionScene } from "../components/SectionScene";
 import { Reveal } from "../components/Reveal";
 
 export function Experience() {
@@ -9,7 +10,8 @@ export function Experience() {
   const scaleY = useSpring(scrollYProgress, { stiffness: 120, damping: 28, restDelta: 0.001 });
 
   return (
-    <section id="experience" className="relative z-10 bg-bg/80 py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
+    <section id="experience" className="overflow-hidden relative py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
+      <SectionScene scene="growth" strength={0.8} />
       <div className="mx-auto max-w-[1200px]">
         <Reveal className="mb-14 sm:mb-20 max-w-3xl">
           <p className="eyebrow mb-4">Experience</p>

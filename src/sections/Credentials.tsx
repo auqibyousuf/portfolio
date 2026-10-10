@@ -5,7 +5,7 @@ import { Reveal } from "../components/Reveal";
 export function Credentials() {
   const { certifications, profile } = PORTFOLIO_DATA;
   return (
-    <section id="credentials" className="relative z-10 bg-bg/80 py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
+    <section id="credentials" className="relative py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
       <div className="mx-auto max-w-[1200px]">
         <Reveal className="mb-14 max-w-3xl">
           <p className="eyebrow mb-4">Credentials</p>

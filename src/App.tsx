@@ -2,14 +2,13 @@ import { lazy, Suspense, useState } from "react";
 import { MotionConfig } from "framer-motion";
 import type { ProjectItem } from "./data/portfolioData";
 import { Nav } from "./components/Nav";
-import { WorldBackdrop } from "./components/WorldBackdrop";
 import { SafeBoundary } from "./components/SafeBoundary";
-import { Hero } from "./sections/Hero";
 import { Intro } from "./sections/Intro";
 import { Work } from "./sections/Work";
 import { Architecture } from "./sections/Architecture";
 import { Stack } from "./sections/Stack";
 import { Experience } from "./sections/Experience";
+import { Explorations } from "./sections/Explorations";
 import { Credentials } from "./sections/Credentials";
 import { Contact } from "./sections/Contact";
 
@@ -20,18 +19,15 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="relative bg-bg text-ink min-h-screen overflow-x-clip">
-        <SafeBoundary>
-          <WorldBackdrop />
-        </SafeBoundary>
+      <div className="relative text-ink min-h-screen overflow-x-clip">
         <Nav />
         <main>
-          <Hero />
           <Intro />
           <Work onSelect={setSelected} />
           <Architecture />
           <Stack />
           <Experience />
+          <Explorations />
           <Credentials />
         </main>
         <Contact />

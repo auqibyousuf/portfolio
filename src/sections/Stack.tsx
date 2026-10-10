@@ -1,4 +1,5 @@
 import { PORTFOLIO_DATA } from "../data/portfolioData";
+import { SectionScene } from "../components/SectionScene";
 import { Reveal } from "../components/Reveal";
 
 function Row({ items, reverse }: { items: string[]; reverse?: boolean }) {
@@ -22,7 +23,8 @@ export function Stack() {
   const half = Math.ceil(all.length / 2);
 
   return (
-    <section id="stack" className="relative z-10 bg-bg/80 py-24 sm:py-32 border-t border-line overflow-hidden">
+    <section id="stack" className="relative py-24 sm:py-32 border-t border-line overflow-hidden">
+      <SectionScene scene="glyphs" strength={0.75} />
       <div className="mx-auto max-w-[1200px] px-6 sm:px-12">
         <Reveal className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
