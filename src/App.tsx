@@ -3,6 +3,7 @@ import { MotionConfig } from "framer-motion";
 import type { ProjectItem } from "./data/portfolioData";
 import { Nav } from "./components/Nav";
 import { WorldBackdrop } from "./components/WorldBackdrop";
+import { SafeBoundary } from "./components/SafeBoundary";
 import { Hero } from "./sections/Hero";
 import { Intro } from "./sections/Intro";
 import { Work } from "./sections/Work";
@@ -20,7 +21,9 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="relative bg-bg text-ink min-h-screen overflow-x-clip">
-        <WorldBackdrop />
+        <SafeBoundary>
+          <WorldBackdrop />
+        </SafeBoundary>
         <Nav />
         <main>
           <Hero />
@@ -32,9 +35,11 @@ export default function App() {
           <Credentials />
         </main>
         <Contact />
-        <Suspense fallback={null}>
-          <ProjectModal project={selected} onClose={() => setSelected(null)} />
-        </Suspense>
+        <SafeBoundary>
+          <Suspense fallback={null}>
+            <ProjectModal project={selected} onClose={() => setSelected(null)} />
+          </Suspense>
+        </SafeBoundary>
       </div>
     </MotionConfig>
   );

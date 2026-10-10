@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, Copy, Mail, Phone } from "lucide-react";
-import { LiquidMetalButton } from "@designcodeio/threeui/components/LiquidMetalButton";
+import { MetalButton } from "../components/MetalButton";
 import { PORTFOLIO_DATA } from "../data/portfolioData";
 import { GithubIcon, LinkedinIcon } from "../components/icons";
 import { Reveal } from "../components/Reveal";
@@ -33,7 +33,7 @@ export function Contact() {
         </Reveal>
 
         <Reveal delay={0.1} className="mt-12 flex flex-wrap items-center gap-5">
-          <LiquidMetalButton variant="pill" text={copied ? "Email copied" : "Copy my email"} onClick={copy} />
+          <MetalButton text={copied ? "Email copied" : "Copy my email"} onClick={copy} />
           <a href={`mailto:${p.email}`} className="inline-flex items-center gap-2 text-sm text-ink hover:text-leaf transition-colors">
             <Mail className="h-4 w-4" /> {p.email}
           </a>

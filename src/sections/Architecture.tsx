@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { LiquidMetalButton } from "@designcodeio/threeui/components/LiquidMetalButton";
+import { MetalButton } from "../components/MetalButton";
 import { Reveal } from "../components/Reveal";
 
 const STEPS = [
@@ -99,7 +99,7 @@ export function Architecture() {
               </motion.div>
             </div>
             <div className="mt-8 flex items-center gap-4">
-              <LiquidMetalButton variant="pill" text={running ? "Running…" : "Run pipeline"} onClick={run} />
+              <MetalButton text={running ? "Running…" : "Run pipeline"} onClick={run} />
               <span className="text-xs text-mute">{running ? "Deploying through every layer" : "Walk through the full delivery chain"}</span>
             </div>
           </div>
