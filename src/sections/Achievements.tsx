@@ -9,9 +9,12 @@ export function Achievements() {
   return (
     <section id="achievements" className="relative overflow-hidden py-24 sm:py-32">
       <div className="mx-auto max-w-[1280px] px-6">
-        <Reveal className="mb-12 max-w-3xl">
-          <p className="section-no mb-5">05 &nbsp;/&nbsp; ACHIEVEMENTS</p>
-          <h2 className="h-display text-[clamp(2.2rem,5vw,4rem)]">{a.title}</h2>
+        <Reveal className="mb-12 flex items-end justify-between gap-8 lg:mb-0">
+          <div className="max-w-3xl lg:pb-12">
+            <p className="section-no mb-5">05 &nbsp;/&nbsp; ACHIEVEMENTS</p>
+            <h2 className="h-display text-[clamp(2.2rem,5vw,4rem)]">{a.title}</h2>
+          </div>
+          <Character pose="sit" className="float-slow -mb-3 mr-6 hidden h-[250px] w-auto shrink-0 drop-shadow-[0_18px_22px_rgba(15,18,24,0.14)] lg:block" />
         </Reveal>
 
         <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
@@ -49,8 +52,7 @@ export function Achievements() {
               <p className="mt-3 font-display text-[clamp(5rem,12vw,9rem)] font-semibold leading-[0.9] tracking-[-0.05em]">{a.feature.value}</p>
               <p className="mt-2 font-display text-2xl font-semibold tracking-tight">{a.feature.label}</p>
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/85">{a.feature.text}</p>
-              <p className="label mt-4 !text-white/60">{a.feature.source}</p>
-              <Character pose="celebrate" className="float mx-auto mt-auto h-[300px] w-auto max-w-full pt-6 drop-shadow-[0_24px_30px_rgba(0,0,0,0.3)]" title="Auqib celebrating" />
+              <p className="label mt-auto pt-8 !text-white/60">{a.feature.source}</p>
             </article>
           </Reveal>
         </div>

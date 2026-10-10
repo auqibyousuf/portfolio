@@ -24,9 +24,12 @@ export function Skills() {
   return (
     <section id="skills" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-[1280px] px-6">
-        <Reveal className="mb-10 max-w-3xl">
-          <p className="section-no mb-5">04 &nbsp;/&nbsp; SKILLS</p>
-          <h2 className="h-display text-[clamp(2.2rem,5vw,4rem)]">{skills.title}</h2>
+        <Reveal className="mb-10 flex items-end justify-between gap-8">
+          <div className="max-w-3xl">
+            <p className="section-no mb-5">04 &nbsp;/&nbsp; SKILLS</p>
+            <h2 className="h-display text-[clamp(2.2rem,5vw,4rem)]">{skills.title}</h2>
+          </div>
+          <Character pose="point-left" className="float-slow -mb-2 hidden h-[230px] w-auto shrink-0 drop-shadow-[0_20px_24px_rgba(15,18,24,0.14)] md:block" />
         </Reveal>
 
         <div role="tablist" aria-label="Skill categories" className="mb-6 flex flex-wrap gap-2">

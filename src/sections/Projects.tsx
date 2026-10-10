@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { SITE } from "../data/site";
 import type { ProjectItem } from "../data/portfolioData";
@@ -8,6 +8,7 @@ import { Ticker } from "../components/Ticker";
 /** Streaming-style rail of project cards: scroll-snap, drag-free, with arrow controls. */
 export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
   const rail = useRef<HTMLUListElement>(null);
+  const [moved, setMoved] = useState(false);
   const { projects } = SITE;
 
   const scrollBy = (dir: 1 | -1) => {
@@ -44,11 +45,11 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
 
       <div className="relative mt-12">
         {/* pointing character */}
-        <div className="pointer-events-none absolute -top-9 left-6 z-10 hidden xl:block" aria-hidden="true">
+        <div className={`pointer-events-none absolute -top-9 left-6 z-10 hidden transition-opacity duration-500 xl:block ${moved ? "opacity-0" : "opacity-100"}`} aria-hidden="true">
           <Character pose="point-right" className="h-[250px] w-auto drop-shadow-[0_20px_24px_rgba(15,18,24,0.16)]" />
         </div>
 
-        <ul ref={rail} className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-10 pt-6" aria-label="Projects">
+        <ul ref={rail} onScroll={(e) => setMoved(e.currentTarget.scrollLeft > 40)} className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-10 pt-6" aria-label="Projects">
           <li aria-hidden="true" className="hidden w-[170px] shrink-0 snap-start xl:block" />
           {projects.items.map((p, i) => (
             <li key={p.id} className="w-[84vw] max-w-[400px] shrink-0 snap-start sm:w-[360px]">
@@ -97,6 +98,17 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
               </button>
             </li>
           ))}
+          <li className="flex w-[84vw] max-w-[400px] shrink-0 snap-start items-stretch sm:w-[360px]">
+            <div className="relative flex w-full flex-col justify-between overflow-hidden rounded-card bg-accent p-7 text-white shadow-lift">
+              <div aria-hidden="true" className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-white/10" />
+              <div className="relative">
+                <p className="label !text-white/70">That&rsquo;s the lot</p>
+                <p className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight">Want the full story on any of these?</p>
+                <a href="#contact" className="btn mt-6 bg-white !text-ink hover:!bg-ink hover:!text-white">Start a conversation</a>
+              </div>
+              <Character pose="point-left" className="relative mx-auto mt-6 h-[260px] w-auto drop-shadow-[0_22px_26px_rgba(0,0,0,0.3)]" />
+            </div>
+          </li>
         </ul>
 
         <div className="mx-auto mt-2 flex max-w-[1280px] justify-end gap-2 px-6">

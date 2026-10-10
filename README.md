@@ -44,8 +44,11 @@ and hero greeting). Every pose shares one vertical scale and is trimmed to its o
 
 `<Character pose="..." />` in `src/components/Character.tsx` loads them. To change a pose, replace its file, keep the
 character the same height in the frame, and update the width in the `DIMS` table. The poses currently in use:
-Hero `stand`, About `thumbs-up`, Experience `think`, Projects `point-right`, Skills `code`, Achievements `celebrate`,
-Contact `present`. `point-left` and `sit` are ready for later use.
+Hero (head turns with the cursor), About `thumbs-up`, Experience `think`, Projects `point-right` plus `point-left` on the
+closing card, Skills `code` and `point-left`, Achievements `sit`, Contact `present` and `celebrate` on the success message.
+
+The hero uses `hero-body.webp` and `hero-head.webp`, the standing pose split at the neck. `HeroCharacter.tsx` turns, tilts
+and nods the head layer around the neck towards the pointer.
 
 ## Contact form
 

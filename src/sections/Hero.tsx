@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ArrowDownRight } from "lucide-react";
 import { SITE } from "../data/site";
-import { Avatar, Character } from "../components/Character";
+import { Avatar } from "../components/Character";
+import { HeroCharacter } from "../components/HeroCharacter";
 import { Magnetic } from "../components/Magnetic";
 import { Marquee } from "../components/Ticker";
 
@@ -126,7 +127,7 @@ export function Hero({ ready }: { ready: boolean }) {
             style={{ background: "radial-gradient(320px circle at var(--mx,60%) var(--my,35%), rgba(255,255,255,0.85), transparent 60%)", mixBlendMode: "soft-light" }}
           />
           <div className="hero-char float-slow relative">
-            <Character pose="stand" priority className="relative mx-auto h-[min(66svh,600px)] w-auto drop-shadow-[0_30px_40px_rgba(15,18,24,0.2)]" title={`${SITE.profile.shortName}`} />
+            <HeroCharacter className="mx-auto h-[min(66svh,600px)] drop-shadow-[0_30px_40px_rgba(15,18,24,0.2)]" title={SITE.profile.shortName} />
           </div>
           {SITE.hero.chips.map((c, i) => (
             <div

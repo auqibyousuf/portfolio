@@ -162,6 +162,13 @@ export function Contact() {
                 )}
               </p>
             </div>
+
+            {status === "success" && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex items-center gap-4 rounded-2xl bg-paper p-4">
+                <Character pose="celebrate" className="h-24 w-auto shrink-0" />
+                <p className="text-sm font-semibold leading-snug text-ink">Thanks for reaching out. I will get back to you soon.</p>
+              </motion.div>
+            )}
           </form>
         </Reveal>
       </div>
