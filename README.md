@@ -47,8 +47,9 @@ character the same height in the frame, and update the width in the `DIMS` table
 Hero (head turns with the cursor), About `thumbs-up`, Experience `think`, Projects `point-right` plus `point-left` on the
 closing card, Skills `code` and `point-left`, Achievements `sit`, Contact `present` and `celebrate` on the success message.
 
-The hero uses `hero-body.webp` and `hero-head.webp`, the standing pose split at the neck. `HeroCharacter.tsx` turns, tilts
-and nods the head layer around the neck towards the pointer.
+The hero uses `hero-body.webp` and `hero-head.webp` (the standing pose split at the neck, with the irises removed) and one
+sprite per iris, `eye-l.webp` and `eye-r.webp`. `HeroCharacter.tsx` turns, tilts and nods the head around the neck towards
+the pointer, and slides each iris inside its eye opening so the eyes look at the cursor a little ahead of the head.
 
 ## Contact form
 
