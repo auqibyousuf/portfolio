@@ -40,13 +40,13 @@ void main(){
   vec2 uv = gl_FragCoord.xy / uRes;
   vec2 p = (uv - 0.5) * vec2(aspect, 1.0) * 1.7;
 
-  // Cursor trail pushes the liquid outwards.
+  // The recent cursor trail bulges the liquid outwards and, the faster you move, swirls it around the cursor.
   vec2 disp = vec2(0.0);
   for (int i = 0; i < 10; i++) {
     vec2 m = (uTrail[i] - 0.5) * vec2(aspect, 1.0) * 1.7;
     vec2 d = p - m;
-    float w = exp(-dot(d, d) * 5.0) * (1.0 - float(i) / 10.0);
-    disp += d * w * 0.55;
+    float w = exp(-dot(d, d) * 2.6) * (1.0 - float(i) / 10.0);
+    disp += d * w * 0.9 + vec2(-d.y, d.x) * w * (0.35 + uSpeed * 2.2);
   }
   p += disp;
 
@@ -58,11 +58,20 @@ void main(){
   vec3 col = palette(f * 1.1 + length(q) * 0.4 + uTime * 0.015);
   float body = smoothstep(0.3, 0.8, f);
   float rim = pow(clamp(abs(r.x), 0.0, 1.0), 3.0);
-  col = col * body * 0.7 + rim * 0.16;
+  col = col * body * 0.5 + rim * 0.12;
 
-  vec2 dm = (uv - uMouse) * vec2(aspect, 1.0);
-  float glow = exp(-dot(dm, dm) * 14.0);
-  col += palette(uTime * 0.05 + f) * glow * (0.25 + uSpeed * 0.5);
+  // Rainbow comet along the cursor trail and a radial rainbow halo on the cursor. max() keeps colours distinct
+  // where they overlap; summing them would wash out to white.
+  vec3 comet = vec3(0.0);
+  for (int i = 0; i < 10; i++) {
+    vec2 dm = (uv - uTrail[i]) * vec2(aspect, 1.0);
+    float k = exp(-dot(dm, dm) * (70.0 - float(i) * 4.0)) * (1.0 - float(i) / 10.0);
+    comet = max(comet, palette(uTime * 0.08 + float(i) * 0.12) * k);
+  }
+  vec2 dh = (uv - uMouse) * vec2(aspect, 1.0);
+  float rad = length(dh);
+  comet = max(comet, palette(rad * 3.5 - uTime * 0.25) * exp(-rad * rad * 10.0) * 0.85);
+  col += pow(comet, vec3(1.25)) * (0.6 + uSpeed * 1.4);
 
   float vig = smoothstep(1.25, 0.25, length((uv - 0.5) * vec2(aspect, 1.0)));
   col *= mix(0.55, 1.0, vig);
@@ -148,6 +157,7 @@ export function FluidBackground() {
 
     let raf = 0;
     let running = true;
+    let lastShift = 0;
     const start = performance.now();
     const frame = (now: number) => {
       const t = (now - start) / 1000;
@@ -159,10 +169,11 @@ export function FluidBackground() {
       const py = pos.y;
       pos.x += (target.x - pos.x) * 0.08;
       pos.y += (target.y - pos.y) * 0.08;
-      speed += (Math.min(1, Math.hypot(pos.x - px, pos.y - py) * 60) - speed) * 0.1;
+      speed += (Math.min(1, Math.hypot(pos.x - px, pos.y - py) * 90) - speed) * 0.12;
       // Shift the trail every few frames so older points lag behind the cursor.
-      if (Math.floor(t * 30) !== Math.floor((t - 0.016) * 30)) {
+      if (now - lastShift > 45) {
         trail.copyWithin(2, 0, 18);
+        lastShift = now;
       }
       trail[0] = pos.x;
       trail[1] = pos.y;
@@ -196,7 +207,7 @@ export function FluidBackground() {
     <canvas
       ref={canvas}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-20 h-full w-full opacity-[0.34] mix-blend-screen"
+      className="pointer-events-none fixed inset-0 -z-20 h-full w-full opacity-[0.6] mix-blend-screen"
     />
   );
 }
