@@ -402,14 +402,6 @@ export const PORTFOLIO_DATA = {
       "Git & Branching Workflows",
     ],
   },
-  explorations: [
-    { title: "Kubernetes Ingress Gateway", category: "Cloud Architecture", url: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800" },
-    { title: "Decoupled Headless Mesh", category: "Next.js + Drupal", url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800" },
-    { title: "GitOps Delivery Engine", category: "ArgoCD / Helm", url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800" },
-    { title: "Event-Driven Stream", category: "Kafka & Microservices", url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=800" },
-    { title: "Telemetry & Logs HUD", category: "DataDog / ELK", url: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800" },
-    { title: "Design Token Library", category: "Storybook Studio", url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=800" },
-  ],
   certifications: [
     { name: "Meta Front-End Developer Specialization", issuer: "Meta / Coursera", year: "Certified" },
     { name: "Acquia Site Studio Certification", issuer: "Acquia / Drupal", year: "Certified" },

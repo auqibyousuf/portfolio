@@ -21,10 +21,6 @@ const SCENES = {
     const { GenerativeTree } = await import("@designcodeio/threeui/components/GenerativeTree");
     return { default: () => <GenerativeTree hue={105} brightness={3.6} style={fill} /> };
   }),
-  flow: lazy(async () => {
-    const { FlowField } = await import("@designcodeio/threeui/components/FlowField");
-    return { default: () => <FlowField hue={115} style={fill} /> };
-  }),
   horizon: lazy(async () => {
     const { EmeraldHorizonBackground } = await import("@designcodeio/threeui/components/EmeraldHorizonBackground");
     return { default: () => <EmeraldHorizonBackground /> };

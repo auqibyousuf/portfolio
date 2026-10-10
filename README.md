@@ -21,7 +21,6 @@ viewport.
 | Architecture | `LogicCoreField`, plus a `LiquidMetalButton` call to action |
 | Stack | `ParticleDrift` |
 | Experience | `GenerativeTree` |
-| Explorations | `FlowField` |
 | Contact | `EmeraldHorizonBackground`, plus a `LiquidMetalButton` call to action |
 
 Work and Credentials stay as plain sections: none of the library's components could carry their content.

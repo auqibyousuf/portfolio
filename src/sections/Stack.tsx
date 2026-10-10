@@ -1,5 +1,6 @@
 import { PORTFOLIO_DATA } from "../data/portfolioData";
 import { SectionScene } from "../components/SectionScene";
+import { Tilt } from "../components/Tilt";
 import { Reveal } from "../components/Reveal";
 
 function Row({ items, reverse }: { items: string[]; reverse?: boolean }) {
@@ -45,7 +46,7 @@ export function Stack() {
       <div className="mx-auto max-w-[1200px] px-6 sm:px-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {groups.map(([name, items], i) => (
           <Reveal key={name} delay={i * 0.07}>
-            <article className="h-full rounded-3xl border border-line bg-white/[0.03] p-6">
+            <Tilt className="h-full rounded-3xl"><article className="h-full rounded-3xl border border-line bg-white/[0.03] p-6">
               <p className="eyebrow !text-mute mb-1">{String(i + 1).padStart(2, "0")}</p>
               <h3 className="text-lg font-light tracking-tight text-ink mb-5">{name}</h3>
               <ul className="flex flex-wrap gap-2">
@@ -53,7 +54,7 @@ export function Stack() {
                   <li key={s} className="chip">{s}</li>
                 ))}
               </ul>
-            </article>
+            </article></Tilt>
           </Reveal>
         ))}
       </div>

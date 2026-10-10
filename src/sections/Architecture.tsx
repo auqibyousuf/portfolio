@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Tilt } from "../components/Tilt";
 import { MetalButton } from "../components/MetalButton";
 import { SectionScene } from "../components/SectionScene";
 import { Reveal } from "../components/Reveal";
@@ -91,7 +92,7 @@ export function Architecture() {
           </ol>
 
           <div className="lg:sticky lg:top-28">
-            <div className="rounded-3xl border border-line bg-white/[0.03] backdrop-blur-sm p-7 sm:p-9">
+            <Tilt className="rounded-3xl" max={4}><div className="rounded-3xl border border-line bg-white/[0.03] backdrop-blur-sm p-7 sm:p-9">
               <motion.div key={step.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
                 <p className="eyebrow mb-3">{`Layer ${index + 1} of ${STEPS.length}`}</p>
                 <h3 className="text-2xl sm:text-3xl font-light tracking-tight text-ink">{step.title}</h3>
@@ -99,7 +100,7 @@ export function Architecture() {
                 <p className="mt-6 text-sm sm:text-base leading-relaxed text-mute">{step.desc}</p>
                 <p className="mt-8 inline-flex rounded-full border border-line px-4 py-1.5 text-xs text-ink/80">{step.tech}</p>
               </motion.div>
-            </div>
+            </div></Tilt>
             <div className="mt-8 flex items-center gap-4">
               <MetalButton text={running ? "Running…" : "Run pipeline"} onClick={run} />
               <span className="text-xs text-mute">{running ? "Deploying through every layer" : "Walk through the full delivery chain"}</span>

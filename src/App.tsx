@@ -3,12 +3,12 @@ import { MotionConfig } from "framer-motion";
 import type { ProjectItem } from "./data/portfolioData";
 import { Nav } from "./components/Nav";
 import { SafeBoundary } from "./components/SafeBoundary";
+import { FluidBackground } from "./components/FluidBackground";
 import { Intro } from "./sections/Intro";
 import { Work } from "./sections/Work";
 import { Architecture } from "./sections/Architecture";
 import { Stack } from "./sections/Stack";
 import { Experience } from "./sections/Experience";
-import { Explorations } from "./sections/Explorations";
 import { Credentials } from "./sections/Credentials";
 import { Contact } from "./sections/Contact";
 
@@ -20,6 +20,9 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="relative text-ink min-h-screen overflow-x-clip">
+        <SafeBoundary>
+          <FluidBackground />
+        </SafeBoundary>
         <Nav />
         <main>
           <Intro />
@@ -27,7 +30,6 @@ export default function App() {
           <Architecture />
           <Stack />
           <Experience />
-          <Explorations />
           <Credentials />
         </main>
         <Contact />

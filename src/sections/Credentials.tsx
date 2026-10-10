@@ -1,5 +1,6 @@
 import { Award, GraduationCap, Languages } from "lucide-react";
 import { PORTFOLIO_DATA } from "../data/portfolioData";
+import { Tilt } from "../components/Tilt";
 import { Reveal } from "../components/Reveal";
 
 export function Credentials() {
@@ -15,11 +16,11 @@ export function Credentials() {
         <div className="grid md:grid-cols-3 gap-4">
           {certifications.map((c, i) => (
             <Reveal key={c.name} delay={i * 0.08}>
-              <article className="h-full rounded-3xl border border-line bg-white/[0.03] p-7 flex flex-col">
+              <Tilt className="h-full rounded-3xl"><article className="h-full rounded-3xl border border-line bg-white/[0.03] p-7 flex flex-col">
                 <Award className="h-6 w-6 text-leaf mb-8" aria-hidden="true" />
                 <h3 className="text-xl font-light tracking-tight text-ink">{c.name}</h3>
                 <p className="mt-auto pt-8 text-xs text-mute">{c.issuer}</p>
-              </article>
+              </article></Tilt>
             </Reveal>
           ))}
         </div>
