@@ -1,7 +1,6 @@
 # Portfolio — Auqib Yousuf Ahangar (redesign)
 
-React 19, TypeScript, Vite, Tailwind CSS and Framer Motion, built around the [ThreeUI](https://threeui.com) Sylva
-"Living Green" world.
+React 19, TypeScript, Vite, Tailwind CSS and Framer Motion, with [ThreeUI](https://threeui.com) 3D scenes.
 
 ```bash
 npm install
@@ -10,13 +9,22 @@ npm run build    # type-check + production build
 npm run lint
 ```
 
-## ThreeUI integration
+## ThreeUI usage
 
-| Piece | Source |
+Scenes come from `@designcodeio/threeui` and are retinted to the moss palette with their `hue` and `brightness`
+props. `src/components/SectionScene.tsx` code-splits them and mounts each one only while its section is near the
+viewport.
+
+| Section | Component |
 | --- | --- |
-| `SylvaHero` (Living Green) | Registered source bundle `sylva-hero.json`; files under `src/shaders/landing-pages/` and `src/shaders/threeui.css` are byte-identical to the registered SHA-256 hashes. `SylvaHero.tsx` is the SylvaHero section of the registered `LandingPages.tsx`, trimmed to the Living Green variant. |
-| Authored page and runtime | `public/landing-pages/inner-green-3d.html`, `public/landing-pages/inner-green-assets/*` (copied byte-for-byte, hashes verified) |
-| `SylvaLivingWorldScene` | `@designcodeio/threeui`, lazy-loaded as the persistent backdrop after the hero |
-| `LiquidMetalButton` | `@designcodeio/threeui`, used for the main calls to action |
+| About (opener) | `ConstellationField` |
+| Architecture | `LogicCoreField`, plus a `LiquidMetalButton` call to action |
+| Stack | `ParticleDrift` |
+| Experience | `GenerativeTree` |
+| Explorations | `FlowField` |
+| Contact | `EmeraldHorizonBackground`, plus a `LiquidMetalButton` call to action |
+
+Work and Credentials stay as plain sections: none of the library's components could carry their content.
+Most ThreeUI components are self-contained demos with baked-in copy, so only the clean background-style ones are used.
 
 Content lives in `src/data/portfolioData.ts`.

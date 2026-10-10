@@ -11,7 +11,7 @@ export function Experience() {
 
   return (
     <section id="experience" className="overflow-hidden relative py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
-      <SectionScene scene="growth" strength={0.8} />
+      <SectionScene scene="growth" strength={1} />
       <div className="mx-auto max-w-[1200px]">
         <Reveal className="mb-14 sm:mb-20 max-w-3xl">
           <p className="eyebrow mb-4">Experience</p>

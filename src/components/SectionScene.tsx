@@ -19,7 +19,7 @@ const SCENES = {
   }),
   growth: lazy(async () => {
     const { GenerativeTree } = await import("@designcodeio/threeui/components/GenerativeTree");
-    return { default: () => <GenerativeTree hue={105} brightness={2.4} style={fill} /> };
+    return { default: () => <GenerativeTree hue={105} brightness={3.6} style={fill} /> };
   }),
   flow: lazy(async () => {
     const { FlowField } = await import("@designcodeio/threeui/components/FlowField");

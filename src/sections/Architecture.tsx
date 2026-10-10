@@ -44,7 +44,7 @@ export function Architecture() {
 
   return (
     <section id="architecture" className="overflow-hidden relative py-24 sm:py-32 px-6 sm:px-12 border-t border-line">
-      <SectionScene scene="infrastructure" strength={0.8} />
+      <SectionScene scene="infrastructure" strength={0.55} />
       <div className="mx-auto max-w-[1200px]">
         <Reveal className="mb-14 max-w-3xl">
           <p className="eyebrow mb-4">Engineering sandbox</p>

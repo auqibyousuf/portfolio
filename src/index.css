@@ -22,7 +22,8 @@ html { scroll-behavior: smooth; background: var(--bg); }
 
 body {
   margin: 0;
-  background: var(--bg);
+  /* Transparent on purpose: the page colour lives on <html>, so the negative-z ThreeUI scenes paint above it. */
+  background: transparent;
   color: #eef2e6;
   font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
   font-weight: 300;
