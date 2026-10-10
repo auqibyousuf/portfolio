@@ -18,11 +18,6 @@ export const SITE = {
     { label: "Achievements", href: "#achievements" },
   ],
 
-  /** Optional real image assets. Drop PNGs into /public/characters and map a pose to its path to replace the built-in SVG. */
-  characters: {} as Partial<Record<string, string>>,
-  /** Optional profile photo path (for example "/profile.jpg"). Without it the avatar uses the character. */
-  photo: undefined as string | undefined,
-
   preloader: {
     status: [
       "// SYSTEM BOOT SEQUENCE",

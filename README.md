@@ -36,11 +36,16 @@ body, Mrs Saint Delafield for signature lines and JetBrains Mono for tickers. To
 - `src/data/site.ts` maps that content onto the sections and holds the remaining copy. Numbers shown in
   Achievements are taken from the figures already in the experience and project data.
 
-## Characters and photo
+## Characters
 
-The character is an original SVG illustration (`src/components/Character.tsx`) with nine poses. To use your own
-GenEmoji renders instead, put PNGs in `public/characters/` and map a pose to its file in `SITE.characters`
-(`src/data/site.ts`), for example `{ stand: "/characters/stand.png" }`. Set `SITE.photo` to use a real profile photo.
+The character is a set of transparent WebP renders in `public/images/characters/`: `stand`, `think`, `code`, `celebrate`,
+`thumbs-up`, `present`, `point-left`, `point-right` and `sit`, plus `avatar` (a face-and-shoulders crop used in the navbar
+and hero greeting). Every pose shares one vertical scale and is trimmed to its own width, so size them by height.
+
+`<Character pose="..." />` in `src/components/Character.tsx` loads them. To change a pose, replace its file, keep the
+character the same height in the frame, and update the width in the `DIMS` table. The poses currently in use:
+Hero `stand`, About `thumbs-up`, Experience `think`, Projects `point-right`, Skills `code`, Achievements `celebrate`,
+Contact `present`. `point-left` and `sit` are ready for later use.
 
 ## Contact form
 

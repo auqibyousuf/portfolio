@@ -50,7 +50,7 @@ export function Achievements() {
               <p className="mt-2 font-display text-2xl font-semibold tracking-tight">{a.feature.label}</p>
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/85">{a.feature.text}</p>
               <p className="label mt-4 !text-white/60">{a.feature.source}</p>
-              <Character pose="celebrate" className="float mx-auto mt-auto h-auto w-[62%] max-w-[260px] pt-6 drop-shadow-[0_24px_30px_rgba(0,0,0,0.3)]" title="Illustrated character celebrating" />
+              <Character pose="celebrate" className="float mx-auto mt-auto h-[300px] w-auto max-w-full pt-6 drop-shadow-[0_24px_30px_rgba(0,0,0,0.3)]" title="Auqib celebrating" />
             </article>
           </Reveal>
         </div>

@@ -41,8 +41,8 @@ export function Experience() {
           <p className="section-no mb-5">02 &nbsp;/&nbsp; EXPERIENCE</p>
           <h2 className="h-display text-[clamp(2.2rem,5vw,4rem)]">{experience.title}</h2>
           <p className="mt-5 max-w-md text-base leading-relaxed text-mute sm:text-lg">{experience.intro}</p>
-          <div className="xp-char mt-8 hidden w-[250px] lg:block">
-            <Character pose="think" className="h-auto w-full drop-shadow-[0_24px_30px_rgba(15,18,24,0.16)]" title="Illustrated character thinking" />
+          <div className="xp-char mt-6 hidden lg:block">
+            <Character pose="think" className="mx-auto h-[min(40svh,340px)] w-auto drop-shadow-[0_24px_30px_rgba(15,18,24,0.16)]" title="Auqib thinking" />
           </div>
         </div>
 

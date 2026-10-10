@@ -106,8 +106,8 @@ export function Contact() {
             </div>
           </Reveal>
 
-          <div className="mt-10 hidden w-[230px] lg:block" aria-hidden="true">
-            <Character pose="present" className="float-slow h-auto w-full drop-shadow-[0_22px_28px_rgba(15,18,24,0.16)]" />
+          <div className="mt-8 hidden lg:block" aria-hidden="true">
+            <Character pose="present" className="float-slow h-[270px] w-auto drop-shadow-[0_22px_28px_rgba(15,18,24,0.16)]" />
           </div>
         </div>
 

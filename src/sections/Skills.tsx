@@ -83,7 +83,7 @@ export function Skills() {
           <div className="relative overflow-hidden rounded-card bg-accent p-6 text-white shadow-lift lg:col-span-1 lg:row-span-2">
             <p className="label !text-white/70">In the zone</p>
             <p className="mt-2 font-display text-2xl font-semibold leading-tight tracking-tight">Building across the stack.</p>
-            <Character pose="code" className="float-slow mx-auto mt-6 h-auto w-[88%] drop-shadow-[0_24px_30px_rgba(0,0,0,0.28)]" title="Illustrated character coding on a laptop" />
+            <Character pose="code" className="float-slow mx-auto mt-6 h-[320px] w-auto drop-shadow-[0_24px_30px_rgba(0,0,0,0.28)]" title="Auqib coding on a laptop" />
           </div>
 
           {/* the other categories as tiles */}

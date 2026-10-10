@@ -48,7 +48,7 @@ export function About({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
         <div className="about-char relative mx-auto w-full max-w-[400px]">
           <div aria-hidden="true" className="absolute inset-x-6 bottom-4 top-12 rounded-[40%] bg-gradient-to-t from-accent/15 to-transparent" />
           <div className="float relative">
-            <Character pose="thumbs-up" className="relative mx-auto h-auto w-[82%] drop-shadow-[0_26px_34px_rgba(15,18,24,0.16)]" title="Illustrated character giving a thumbs up" />
+            <Character pose="thumbs-up" className="relative mx-auto h-[min(70svh,600px)] w-auto drop-shadow-[0_26px_34px_rgba(15,18,24,0.16)]" title="Auqib giving a thumbs up" />
           </div>
         </div>
 

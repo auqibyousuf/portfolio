@@ -44,8 +44,8 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
 
       <div className="relative mt-12">
         {/* pointing character */}
-        <div className="pointer-events-none absolute -top-24 left-6 z-10 hidden w-[190px] xl:block" aria-hidden="true">
-          <Character pose="point-right" className="h-auto w-full drop-shadow-[0_20px_24px_rgba(15,18,24,0.16)]" />
+        <div className="pointer-events-none absolute -top-9 left-6 z-10 hidden xl:block" aria-hidden="true">
+          <Character pose="point-right" className="h-[250px] w-auto drop-shadow-[0_20px_24px_rgba(15,18,24,0.16)]" />
         </div>
 
         <ul ref={rail} className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-10 pt-6" aria-label="Projects">
