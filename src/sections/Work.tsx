@@ -52,13 +52,14 @@ export function Work({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
         c.style.visibility = ad > 3.3 ? "hidden" : "visible";
         if (ad > 3.3) return;
         const fade = 1 - clamp((ad - 2.4) / 0.9, 0, 1);
-        const x = d * 56 + Math.tanh(d) * 14; // % of the card's own width
+        const x = d * 62 + Math.tanh(d) * 16; // % of the card's own width
         const z = -Math.min(ad, 3) * 170 - (ad > 0.5 ? 40 : 0);
         const ry = -Math.tanh(d * 1.1) * 42 + pointer.current.x * 7 * focus;
         const rx = -pointer.current.y * 5 * focus;
         const s = 0.82 + focus * 0.2;
         c.style.transform = `translate(-50%,-50%) translate3d(${x}%,0,${z}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${s})`;
-        c.style.opacity = String(fade * (0.45 + focus * 0.55));
+        c.style.opacity = String(fade);
+        c.style.filter = `brightness(${(0.5 + focus * 0.5).toFixed(2)})`;
         c.style.zIndex = String(100 - Math.round(ad * 10));
         c.style.pointerEvents = ad < 2.6 ? "auto" : "none";
       });

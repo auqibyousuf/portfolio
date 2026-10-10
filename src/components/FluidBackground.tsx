@@ -58,7 +58,7 @@ void main(){
   vec3 col = palette(f * 1.1 + length(q) * 0.4 + uTime * 0.015);
   float body = smoothstep(0.3, 0.8, f);
   float rim = pow(clamp(abs(r.x), 0.0, 1.0), 3.0);
-  col = col * body * 0.85 + rim * 0.22;
+  col = col * body * 0.7 + rim * 0.16;
 
   vec2 dm = (uv - uMouse) * vec2(aspect, 1.0);
   float glow = exp(-dot(dm, dm) * 14.0);
@@ -196,7 +196,7 @@ export function FluidBackground() {
     <canvas
       ref={canvas}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-20 h-full w-full opacity-[0.55] mix-blend-screen"
+      className="pointer-events-none fixed inset-0 -z-20 h-full w-full opacity-[0.34] mix-blend-screen"
     />
   );
 }
