@@ -81,7 +81,7 @@ export function About({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
             <ul className="flex flex-wrap gap-2.5">
               {about.selected.map((p) => (
                 <li key={p.id}>
-                  <button type="button" onClick={() => onSelect(p)} className="group inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold shadow-card transition-colors hover:border-accent hover:text-accent cursor-pointer">
+                  <button type="button" onClick={() => onSelect(p)} className="group inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold shadow-card transition-colors hover:border-accent hover:text-accent cursor-pointer">
                     {p.clientOrProduct}
                     <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                   </button>

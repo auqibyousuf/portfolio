@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { SITE } from "../data/site";
 import { Avatar } from "./Character";
+import { ThemeToggle } from "./ThemeToggle";
 
 /** Floating glass pill navigation with a full-screen sheet on small screens. */
 export function Navbar({ ready }: { ready: boolean }) {
@@ -55,12 +56,13 @@ export function Navbar({ ready }: { ready: boolean }) {
               key={n.href}
               href={n.href}
               className={`hidden rounded-full px-4 py-2 text-[13px] font-medium transition-colors md:block ${
-                active === n.href.slice(1) ? "bg-ink text-white" : "text-ink/70 hover:text-ink"
+                active === n.href.slice(1) ? "bg-ink text-onink" : "text-ink/70 hover:text-ink"
               }`}
             >
               {n.label}
             </a>
           ))}
+          <ThemeToggle />
           <a href="#contact" className="btn btn-accent !px-5 !py-2.5 !text-[13px]">
             Let&rsquo;s talk
           </a>
@@ -68,7 +70,7 @@ export function Navbar({ ready }: { ready: boolean }) {
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open menu"
-            className="ml-1 grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-white md:hidden cursor-pointer"
+            className="ml-1 grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-surface md:hidden cursor-pointer"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -86,7 +88,7 @@ export function Navbar({ ready }: { ready: boolean }) {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] flex flex-col bg-paper/95 p-6 backdrop-blur-xl md:hidden"
           >
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="ml-auto grid h-12 w-12 place-items-center rounded-full bg-white shadow-card cursor-pointer">
+            <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="ml-auto grid h-12 w-12 place-items-center rounded-full bg-surface shadow-card cursor-pointer">
               <X className="h-5 w-5" />
             </button>
             <ul className="mt-10 flex flex-col gap-2">

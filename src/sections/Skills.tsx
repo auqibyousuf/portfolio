@@ -47,7 +47,7 @@ export function Skills() {
               onClick={() => setActive(n)}
               onKeyDown={(e) => onKey(e, i)}
               className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
-                active === n ? "border-ink bg-ink text-white" : "border-line bg-white text-ink/75 hover:border-ink/40"
+                active === n ? "border-ink bg-ink text-onink" : "border-line bg-surface text-ink/75 hover:border-ink/40"
               }`}
             >
               {n}
@@ -100,7 +100,7 @@ export function Skills() {
           ))}
         </div>
 
-        <Ticker items={skills.ticker} className="mt-8 rounded-full border border-line bg-white py-3 text-ink" />
+        <Ticker items={skills.ticker} className="mt-8 rounded-full border border-line bg-surface py-3 text-ink" />
       </div>
     </section>
   );

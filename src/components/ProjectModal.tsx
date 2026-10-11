@@ -39,7 +39,7 @@ export function ProjectModal({ project, onClose }: { project: ProjectItem | null
     <AnimatePresence>
       {project && (
         <motion.div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4 sm:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-          <div className="fixed inset-0 bg-ink/50 backdrop-blur-md" />
+          <div className="fixed inset-0 bg-night/50 backdrop-blur-md" />
           <motion.div
             ref={dialog}
             role="dialog"
@@ -53,7 +53,7 @@ export function ProjectModal({ project, onClose }: { project: ProjectItem | null
             onClick={(e) => e.stopPropagation()}
             className="relative z-10 max-h-[92svh] w-full max-w-4xl overflow-y-auto rounded-card bg-paper p-6 shadow-lift outline-none sm:p-10"
           >
-            <button type="button" onClick={onClose} aria-label="Close project details" className="absolute right-5 top-5 z-10 grid h-11 w-11 place-items-center rounded-full bg-white shadow-card transition-colors hover:text-accent cursor-pointer">
+            <button type="button" onClick={onClose} aria-label="Close project details" className="absolute right-5 top-5 z-10 grid h-11 w-11 place-items-center rounded-full bg-surface shadow-card transition-colors hover:text-accent cursor-pointer">
               <X className="h-4 w-4" />
             </button>
 

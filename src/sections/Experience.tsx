@@ -53,7 +53,7 @@ export function Experience() {
               <article
                 key={`${x.company}-${x.period}`}
                 className={`xp-card flex flex-col rounded-card p-7 shadow-lift sm:p-9 lg:absolute lg:inset-0 ${
-                  accent ? "bg-accent text-white" : "border border-line/60 bg-white text-ink"
+                  accent ? "bg-accent text-white" : "border border-line/60 bg-surface text-ink"
                 }`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">

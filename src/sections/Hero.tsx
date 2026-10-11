@@ -86,7 +86,7 @@ export function Hero({ ready }: { ready: boolean }) {
       <div className="hero-bg pointer-events-none absolute inset-0 grid place-items-center" aria-hidden="true">
         <span
           className="hero-bgword select-none font-display font-extrabold leading-none tracking-[-0.06em]"
-          style={{ fontSize: "clamp(8rem, 27vw, 25rem)", color: "transparent", WebkitTextStroke: "2px rgba(15,18,24,0.09)" }}
+          style={{ fontSize: "clamp(8rem, 27vw, 25rem)", color: "transparent", WebkitTextStroke: "2px rgb(var(--ink) / 0.09)" }}
         >
           {SITE.watermark}
         </span>
@@ -125,7 +125,7 @@ export function Hero({ ready }: { ready: boolean }) {
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
-            style={{ background: "radial-gradient(320px circle at var(--mx,60%) var(--my,35%), rgba(255,255,255,0.85), transparent 60%)", mixBlendMode: "soft-light" }}
+            style={{ background: "radial-gradient(320px circle at var(--mx,60%) var(--my,35%), rgb(var(--surface) / 0.85), transparent 60%)", mixBlendMode: "soft-light" }}
           />
           <div className="hero-char float-slow relative">
             <HeroCharacter onLook={setLook} className="mx-auto h-[min(66svh,600px)] drop-shadow-[0_30px_40px_rgba(15,18,24,0.2)]" title={SITE.profile.shortName} />

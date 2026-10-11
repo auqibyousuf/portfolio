@@ -70,15 +70,15 @@ export function Contact() {
   };
 
   const field = (id: keyof Values) =>
-    `w-full rounded-2xl border bg-white px-4 py-3.5 text-sm text-ink outline-none transition-colors placeholder:text-mute/60 focus:border-accent ${
+    `w-full rounded-2xl border bg-surface px-4 py-3.5 text-sm text-ink outline-none transition-colors placeholder:text-mute/60 focus:border-accent ${
       errors[id] ? "border-accent" : "border-line"
     }`;
 
   return (
-    <section id="contact" ref={root} className="relative overflow-hidden bg-white py-24 sm:py-32">
+    <section id="contact" ref={root} className="relative overflow-hidden bg-surface/70 py-24 sm:py-32">
       <motion.span
         aria-hidden="true"
-        style={{ x: wmX, fontSize: "clamp(8rem, 26vw, 24rem)", color: "transparent", WebkitTextStroke: "2px rgba(15,18,24,0.06)" }}
+        style={{ x: wmX, fontSize: "clamp(8rem, 26vw, 24rem)", color: "transparent", WebkitTextStroke: "2px rgb(var(--ink) / 0.06)" }}
         className="pointer-events-none absolute top-4 left-0 select-none whitespace-nowrap font-display font-extrabold leading-none tracking-[-0.05em]"
       >
         CONTACT
@@ -112,7 +112,7 @@ export function Contact() {
         </div>
 
         <Reveal delay={0.08}>
-          <form onSubmit={submit} noValidate className="glass rounded-card !bg-white/80 p-6 sm:p-9" aria-describedby="cf-status">
+          <form onSubmit={submit} noValidate className="glass rounded-card !bg-surface/80 p-6 sm:p-9" aria-describedby="cf-status">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="cf-firstName" className="label mb-2 block">First name</label>

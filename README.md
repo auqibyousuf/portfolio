@@ -24,9 +24,19 @@ npm run lint
 | 08 | Contact | Validated, accessible form with loading, success and error states |
 | 09 | Footer | Status ticker, focus areas, large name treatment |
 
+## Background, cursor and themes
+
+- `MeshBackground.tsx`: a full-page dot mesh on a canvas. It breathes with a slow wave; around the cursor the dots swell,
+  push apart and connect while an accent glow follows the pointer; a click sends a ripple through it. With no pointer
+  (touch, idle) the glow wanders by itself, and with reduced motion the mesh is drawn once and stays still.
+- `CrosshairCursor.tsx`: dot, lagging ring with ticks, faint guide lines and a coordinate label. It swells over links and
+  buttons, pinches on click, is skipped on touch and for reduced motion, and the normal cursor returns over form fields.
+- `ThemeToggle.tsx`: one button in the navbar cycles auto (follows the device), light and dark. The choice is saved and
+  applied by a small script in `index.html` before first paint, so there is no flash.
+
 ## Design system
 
-One light base (`#F4F5F7`), white surfaces, one crimson accent (`#D4223A`), Bricolage Grotesque for display, Manrope for
+Two themes from one set of CSS variables (light base `#F4F5F7` with white surfaces; a near-black dark set), one crimson accent (`#D4223A`, slightly lifted in dark), Bricolage Grotesque for display, Manrope for
 body, Mrs Saint Delafield for signature lines and JetBrains Mono for tickers. Tokens live in `tailwind.config.js` and
 `src/index.css`. Reduced-motion preferences are respected throughout.
 

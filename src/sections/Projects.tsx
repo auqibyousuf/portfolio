@@ -18,12 +18,12 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
   };
 
   return (
-    <section id="projects" className="relative overflow-hidden bg-white py-24 sm:py-32">
+    <section id="projects" className="relative overflow-hidden bg-surface/70 py-24 sm:py-32">
       {/* watermark */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 select-none whitespace-nowrap font-display font-extrabold leading-none tracking-[-0.05em]"
-        style={{ fontSize: "clamp(8rem, 26vw, 24rem)", color: "transparent", WebkitTextStroke: "2px rgba(15,18,24,0.06)" }}
+        style={{ fontSize: "clamp(8rem, 26vw, 24rem)", color: "transparent", WebkitTextStroke: "2px rgb(var(--ink) / 0.06)" }}
       >
         WORK
       </span>
@@ -38,7 +38,7 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
         </div>
 
         {/* banner with a fast ticker */}
-        <div className="relative mt-10 overflow-hidden rounded-card bg-ink py-4 text-white shadow-lift">
+        <div className="relative mt-10 overflow-hidden rounded-card bg-night py-4 text-white shadow-lift">
           <Ticker items={projects.ticker} fast className="text-white" />
         </div>
       </div>
@@ -61,7 +61,7 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
                 <span className="relative block aspect-[16/11] overflow-hidden bg-soft">
                   <img src={p.image} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <span className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
-                  <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink backdrop-blur">
+                  <span className="absolute left-4 top-4 rounded-full bg-surface/90 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink backdrop-blur">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {p.demoUrl && (
@@ -78,13 +78,13 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
 
                   <span className="mt-5 flex flex-wrap gap-1.5">
                     {p.stack.slice(0, 3).map((t) => (
-                      <span key={t} className="tag !bg-white">{t}</span>
+                      <span key={t} className="tag !bg-surface">{t}</span>
                     ))}
                   </span>
 
                   <span className="mt-auto grid grid-cols-2 gap-2 pt-6">
                     {p.stats.slice(0, 2).map((s) => (
-                      <span key={s.label} className="rounded-2xl bg-white px-3 py-2.5">
+                      <span key={s.label} className="rounded-2xl bg-surface px-3 py-2.5">
                         <span className="block text-[13px] font-bold leading-tight text-ink">{s.value}</span>
                         <span className="label mt-0.5 block !text-[9px]">{s.label}</span>
                       </span>
@@ -104,7 +104,7 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
               <div className="relative">
                 <p className="label !text-white/70">That&rsquo;s the lot</p>
                 <p className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight">Want the full story on any of these?</p>
-                <a href="#contact" className="btn mt-6 bg-white !text-ink hover:!bg-ink hover:!text-white">Start a conversation</a>
+                <a href="#contact" className="btn mt-6 bg-white !text-night hover:!bg-night hover:!text-white">Start a conversation</a>
               </div>
               <Character pose="point-left" className="relative mx-auto mt-6 h-[260px] w-auto drop-shadow-[0_22px_26px_rgba(0,0,0,0.3)]" />
             </div>
@@ -112,10 +112,10 @@ export function Projects({ onSelect }: { onSelect: (p: ProjectItem) => void }) {
         </ul>
 
         <div className="mx-auto mt-2 flex max-w-[1280px] justify-end gap-2 px-6">
-          <button type="button" onClick={() => scrollBy(-1)} aria-label="Scroll projects left" className="grid h-12 w-12 place-items-center rounded-full border border-line bg-white shadow-card transition-colors hover:bg-ink hover:text-white cursor-pointer">
+          <button type="button" onClick={() => scrollBy(-1)} aria-label="Scroll projects left" className="grid h-12 w-12 place-items-center rounded-full border border-line bg-surface shadow-card transition-colors hover:bg-ink hover:text-white cursor-pointer">
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <button type="button" onClick={() => scrollBy(1)} aria-label="Scroll projects right" className="grid h-12 w-12 place-items-center rounded-full border border-line bg-white shadow-card transition-colors hover:bg-ink hover:text-white cursor-pointer">
+          <button type="button" onClick={() => scrollBy(1)} aria-label="Scroll projects right" className="grid h-12 w-12 place-items-center rounded-full border border-line bg-surface shadow-card transition-colors hover:bg-ink hover:text-white cursor-pointer">
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

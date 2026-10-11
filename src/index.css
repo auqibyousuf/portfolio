@@ -4,27 +4,65 @@
 
 :root {
   color-scheme: light;
-  --paper: #f4f5f7;
-  --ink: #0f1218;
-  --accent: #d4223a;
+  --paper: 244 245 247;
+  --surface: 255 255 255;
+  --ink: 15 18 24;
+  --onink: 255 255 255;
+  --mute: 93 101 115;
+  --soft: 232 234 238;
+  --line: 218 221 227;
+  --night: 15 18 24;
+  --accent: 212 34 58;
+  --accent-deep: 176 26 47;
+}
+
+/* Dark: chosen explicitly, or automatically when the visitor has not chosen and the OS is dark. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: 11 13 18;
+  --surface: 21 25 33;
+  --ink: 238 240 244;
+  --onink: 11 13 18;
+  --mute: 152 161 178;
+  --soft: 31 36 47;
+  --line: 40 46 58;
+  --night: 6 8 11;
+  --accent: 236 62 86;
+  --accent-deep: 208 44 68;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --paper: 11 13 18;
+    --surface: 21 25 33;
+    --ink: 238 240 244;
+    --onink: 11 13 18;
+    --mute: 152 161 178;
+    --soft: 31 36 47;
+    --line: 40 46 58;
+    --night: 6 8 11;
+    --accent: 236 62 86;
+    --accent-deep: 208 44 68;
+  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; background: var(--paper); }
+html { scroll-behavior: smooth; background: rgb(var(--paper)); transition: background-color 0.3s ease; }
 
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
+  /* Transparent on purpose: the page colour lives on <html>, so the fixed mesh canvas (z -10) paints above it. */
+  background: transparent;
+  color: rgb(var(--ink));
   font-family: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
 }
 
-::selection { background: var(--accent); color: #fff; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 10px; }
+::selection { background: rgb(var(--accent)); color: #fff; }
+:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 3px; border-radius: 10px; }
 
 section[id], footer[id] { scroll-margin-top: 5rem; }
 
@@ -39,17 +77,17 @@ section[id], footer[id] { scroll-margin-top: 5rem; }
     @apply font-display font-semibold tracking-[-0.03em] leading-[0.98] text-ink;
   }
   .card {
-    @apply rounded-card bg-card shadow-card border border-line/60;
+    @apply rounded-card bg-surface shadow-card border border-line/60;
   }
   .glass {
-    @apply border border-white/70 bg-white/60 backdrop-blur-xl shadow-card;
+    @apply border border-surface/70 bg-surface/60 backdrop-blur-xl shadow-card;
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold tracking-tight transition-[background,color,transform,box-shadow] duration-300 cursor-pointer;
   }
-  .btn-primary { @apply bg-ink text-white hover:bg-accent; }
+  .btn-primary { @apply bg-ink text-onink hover:bg-accent hover:text-white; }
   .btn-accent { @apply bg-accent text-white hover:bg-accent-deep; }
-  .btn-ghost { @apply border border-ink/15 bg-white/70 text-ink hover:border-ink hover:bg-white; }
+  .btn-ghost { @apply border border-ink/15 bg-surface/70 text-ink hover:border-ink hover:bg-surface; }
   .tag {
     @apply inline-flex items-center rounded-full border border-line bg-paper px-3 py-1 text-xs font-medium text-ink/80;
   }
@@ -77,4 +115,27 @@ section[id], footer[id] { scroll-margin-top: 5rem; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .ticker-track, .float, .float-slow, .confetti { animation: none; }
+}
+
+/* Crosshair cursor */
+.crosshair-layer { position: fixed; inset: 0; z-index: 9999; pointer-events: none; }
+.crosshair-layer > * { position: fixed; left: 0; top: 0; opacity: 0; transition: opacity 0.25s ease; will-change: transform; }
+.crosshair-line { background: rgb(var(--ink) / 0.07); }
+.crosshair-h { width: 100vw; height: 1px; }
+.crosshair-v { width: 1px; height: 100vh; }
+.crosshair-dot { width: 6px; height: 6px; border-radius: 9999px; background: rgb(var(--accent)); }
+.crosshair-ring {
+  width: 38px; height: 38px; border-radius: 9999px; border: 1px solid rgb(var(--ink) / 0.55);
+  transition: opacity 0.25s ease, width 0.25s ease, height 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+.crosshair-ring i { position: absolute; background: rgb(var(--ink) / 0.55); }
+.crosshair-ring i:nth-child(1) { left: 50%; top: -6px; width: 1px; height: 8px; transform: translateX(-50%); }
+.crosshair-ring i:nth-child(2) { left: 50%; bottom: -6px; width: 1px; height: 8px; transform: translateX(-50%); }
+.crosshair-ring i:nth-child(3) { top: 50%; left: -6px; width: 8px; height: 1px; transform: translateY(-50%); }
+.crosshair-ring i:nth-child(4) { top: 50%; right: -6px; width: 8px; height: 1px; transform: translateY(-50%); }
+.crosshair-ring.is-hover { width: 62px; height: 62px; border-color: rgb(var(--accent)); background: rgb(var(--accent) / 0.1); }
+.crosshair-ring.is-down { width: 26px; height: 26px; border-color: rgb(var(--accent)); }
+.crosshair-label { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; white-space: pre; color: rgb(var(--mute)); }
+@media (hover: hover) and (pointer: fine) {
+  html.has-crosshair, html.has-crosshair *:not(input):not(textarea):not(select) { cursor: none !important; }
 }

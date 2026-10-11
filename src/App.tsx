@@ -4,6 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { ProjectItem } from "./data/portfolioData";
 import { Preloader } from "./components/Preloader";
 import { Navbar } from "./components/Navbar";
+import { MeshBackground } from "./components/MeshBackground";
+import { CrosshairCursor } from "./components/CrosshairCursor";
 import { ProjectModal } from "./components/ProjectModal";
 import { Hero } from "./sections/Hero";
 import { About } from "./sections/About";
@@ -29,9 +31,11 @@ export default function App() {
 
   return (
     <>
-      <a href="#about" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-sm focus:text-white">
+      <a href="#about" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-sm focus:text-onink">
         Skip to content
       </a>
+      <MeshBackground />
+      <CrosshairCursor />
       <AnimatePresence>{loading && <Preloader onDone={done} />}</AnimatePresence>
       <Navbar ready={!loading} />
       <main>

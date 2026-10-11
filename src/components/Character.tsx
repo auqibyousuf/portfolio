@@ -38,7 +38,7 @@ export function Character({ pose = "stand", className = "", title, priority = fa
 export function Avatar({ size = 56, className = "" }: { size?: number; className?: string }) {
   return (
     <span
-      className={`relative inline-block shrink-0 overflow-hidden rounded-full border-2 border-white bg-gradient-to-br from-accent/15 to-soft shadow-card ${className}`}
+      className={`relative inline-block shrink-0 overflow-hidden rounded-full border-2 border-surface bg-gradient-to-br from-accent/15 to-soft shadow-card ${className}`}
       style={{ width: size, height: size }}
     >
       <img src="/images/characters/avatar.webp" width={360} height={360} alt="" loading="lazy" decoding="async" draggable={false} className="h-full w-full object-cover" />

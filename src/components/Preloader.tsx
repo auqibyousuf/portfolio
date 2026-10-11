@@ -50,7 +50,7 @@ export function Preloader({ onDone }: { onDone: () => void }) {
         <motion.span
           key={i}
           aria-hidden="true"
-          className="absolute rounded-full border border-white/80 bg-gradient-to-br from-white to-accent/10 shadow-card"
+          className="absolute rounded-full border border-surface/80 bg-gradient-to-br from-surface to-accent/10 shadow-card"
           style={{ width: b.size, height: b.size, left: `${b.left}%`, top: `${b.top}%` }}
           animate={reduced ? undefined : { y: [0, -26, 0], x: [0, 8, 0] }}
           transition={{ duration: b.duration, delay: b.delay, repeat: Infinity, ease: "easeInOut" }}
@@ -64,7 +64,7 @@ export function Preloader({ onDone }: { onDone: () => void }) {
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="grid h-24 w-24 place-items-center rounded-[28px] bg-ink font-display text-4xl font-semibold tracking-tight text-white shadow-lift"
+          className="grid h-24 w-24 place-items-center rounded-[28px] bg-night font-display text-4xl font-semibold tracking-tight text-white shadow-lift"
         >
           {SITE.monogram}
         </motion.div>

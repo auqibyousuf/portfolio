@@ -31,8 +31,8 @@ export function Achievements() {
             ))}
             {a.certifications.map((c, i) => (
               <Reveal key={c.name} delay={0.2 + i * 0.06}>
-                <article className="flex h-full items-start gap-4 rounded-card border border-line bg-white/70 p-6 backdrop-blur">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-ink text-white">
+                <article className="flex h-full items-start gap-4 rounded-card border border-line bg-surface/70 p-6 backdrop-blur">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-night text-white">
                     <Award className="h-5 w-5" />
                   </span>
                   <span>

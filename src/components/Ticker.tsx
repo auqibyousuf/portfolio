@@ -24,7 +24,7 @@ export function Marquee({ items, reverse = false }: { items: string[]; reverse?:
     <div className="ticker overflow-hidden py-1.5" aria-hidden="true">
       <div className={`ticker-track ${reverse ? "reverse" : ""}`} style={{ animationDuration: reverse ? "55s" : "48s" }}>
         {loop.map((t, i) => (
-          <span key={i} className="mx-1.5 shrink-0 rounded-full border border-line bg-white/80 px-6 py-2.5 font-display text-lg font-medium tracking-tight text-ink">
+          <span key={i} className="mx-1.5 shrink-0 rounded-full border border-line bg-surface/80 px-6 py-2.5 font-display text-lg font-medium tracking-tight text-ink">
             {t}
           </span>
         ))}

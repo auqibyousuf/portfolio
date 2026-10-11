@@ -5,7 +5,7 @@ import { GithubIcon, LinkedinIcon } from "../components/icons";
 export function Footer() {
   const { profile, footer } = SITE;
   return (
-    <footer className="relative overflow-hidden bg-ink text-white">
+    <footer className="relative overflow-hidden bg-night text-white">
       <Ticker items={footer.ticker} className="border-b border-white/10 py-3 text-white/60" />
 
       <div className="mx-auto max-w-[1280px] px-6 pt-16">
