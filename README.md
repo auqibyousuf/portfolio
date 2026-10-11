@@ -47,9 +47,14 @@ character the same height in the frame, and update the width in the `DIMS` table
 Hero (head turns with the cursor), About `thumbs-up`, Experience `think`, Projects `point-right` plus `point-left` on the
 closing card, Skills `code` and `point-left`, Achievements `sit`, Contact `present` and `celebrate` on the success message.
 
-The hero uses `hero-body.webp` and `hero-head.webp` (the standing pose split at the neck, with the irises removed) and one
-sprite per iris, `eye-l.webp` and `eye-r.webp`. `HeroCharacter.tsx` turns, tilts and nods the head around the neck towards
-the pointer, and slides each iris inside its eye opening so the eyes look at the cursor a little ahead of the head.
+The hero is built from nine pre-rendered looks over one constant body: `hero-body.webp` plus `look/{up-left,up,up-right,left,
+center,right,down-left,down,down-right}.webp`, each a head-and-shoulders layer. `HeroCharacter.tsx` maps the pointer
+(scaled to the distance to each screen edge) onto a 3 x 3 grid, holds a pose and crossfades quickly to the neighbouring one,
+adds a small tilt, a breath, and reports the direction for the "Looking" readout. Touch devices look around on their own
+and reduced motion shows the straight-ahead look.
+
+The original Gemini renders (JPEG, white background) are kept in `design-assets/characters/`; they are not served. To
+change the look set, regenerate all nine with the same framing and body, then re-cut them the same way.
 
 ## Contact form
 

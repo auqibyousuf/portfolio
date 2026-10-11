@@ -1,26 +1,53 @@
 import { useEffect, useRef } from "react";
 
-const PIVOT = "45.9% 22%"; // the neck, as a share of the image box
+const HEAD_PIVOT = "46% 76%"; // the neck, as a share of the head layers' box (they cover the top 29% of the canvas)
 
-// Eye geometry as percentages of the 306 x 900 canvas. `box` is the eye opening (the iris is clipped to it) and `iris`
-// is the iris sprite's rest position and size relative to that box.
-const EYES = [
-  { src: "/images/characters/eye-l.webp", box: [34.128, 11.931, 8.621, 1.655], iris: [12.941, -12.5, 70.588, 125] },
-  { src: "/images/characters/eye-r.webp", box: [50.913, 11.983, 8.621, 1.655], iris: [15.294, -15.625, 70.588, 125] },
+// Nine heads, one per look direction, on a 3 x 3 grid. Rows run top to bottom, columns left to right. They are drawn over
+// one constant body, so only the head and eyes change between them.
+const GRID = [
+  ["up-left", "up", "up-right"],
+  ["left", "center", "right"],
+  ["down-left", "down", "down-right"],
 ] as const;
-const EYE_TRAVEL = { x: 0.3, y: 0.22 }; // in iris-sprite widths, kept inside a natural range
+const LAYERS = GRID.flat();
+const HEAD_HEIGHT = 29; // % of the 306 x 900 canvas the head layers cover (261px)
+
+export type LookLabel = "Centre" | "Left" | "Right" | "Up" | "Down" | "Up-Left" | "Up-Right" | "Down-Left" | "Down-Right";
+
+// Two different renders ghost when dissolved (double glasses, double beard), so each pose is held and the switch to
+// the next is a quick crossfade in a narrow band around the halfway point.
+const smooth = (t: number) => {
+  const x = Math.min(1, Math.max(0, (t - 0.4) / 0.2));
+  return x * x * (3 - 2 * x);
+};
+
+function labelFor(x: number, y: number): LookLabel {
+  const col = x < -0.5 ? 0 : x > 0.5 ? 2 : 1; // the same thresholds the blend uses, so the label names the pose on show
+  const row = y < -0.5 ? 0 : y > 0.5 ? 2 : 1;
+  const names: LookLabel[][] = [
+    ["Up-Left", "Up", "Up-Right"],
+    ["Left", "Centre", "Right"],
+    ["Down-Left", "Down", "Down-Right"],
+  ];
+  return names[row][col];
+}
 
 /**
- * The hero character as two layers (body and head). The head turns, tilts and nods towards the pointer around the neck,
- * the eyes lead the head and look at the pointer on their own, and the shoulders lean with it, so the character appears to watch the cursor wherever it goes. The response never
- * flattens (each side is scaled to the distance to the screen edge), and a faint breathing motion keeps it alive when the pointer is still. Touch devices,
- * which have no cursor, get a slow look-around instead. With reduced motion everything stays still.
+ * The hero character: nine pre-rendered looks over a constant body. The pointer's position, measured towards each
+ * screen edge, picks a spot on the 3 x 3 grid and the four nearest looks are blended, so the face turns through every
+ * direction as the cursor moves. A small tilt rides on top for continuous motion, a breath keeps the figure alive when
+ * the cursor is still, touch devices look around on their own, and reduced motion shows the straight-ahead look.
  */
-export function HeroCharacter({ className = "", title }: { className?: string; title?: string }) {
+export function HeroCharacter({ className = "", title, onLook }: { className?: string; title?: string; onLook?: (l: LookLabel) => void }) {
   const box = useRef<HTMLDivElement>(null);
   const head = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLImageElement>(null);
-  const eyes = useRef<(HTMLImageElement | null)[]>([]);
+  const layers = useRef<(HTMLImageElement | null)[]>([]);
+  const loaded = useRef<Set<number>>(new Set([4]));
+  const onLookRef = useRef(onLook);
+  useEffect(() => {
+    onLookRef.current = onLook;
+  }, [onLook]);
 
   useEffect(() => {
     const headEl = head.current;
@@ -29,11 +56,11 @@ export function HeroCharacter({ className = "", title }: { className?: string; t
     if (!headEl || !bodyEl || !wrap || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const cur = { x: 0, y: 0 };
-    const gaze = { x: 0, y: 0 };
     const pointer = { x: 0, y: 0, seen: false };
     let visible = true;
-    let raf = 0;
     let running = false;
+    let raf = 0;
+    let lastLabel: LookLabel | "" = "";
 
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
@@ -51,8 +78,8 @@ export function HeroCharacter({ className = "", title }: { className?: string; t
       let gx: number;
       let gy: number;
       if (pointer.seen) {
-        // Aim from the head to the pointer. Each side is scaled by the room the pointer has to travel on that side,
-        // so the angle keeps changing all the way to every edge of the screen instead of flattening out.
+        // Aim from the head to the pointer, scaled by the distance to the screen edge on that side, so the angle
+        // keeps changing right out to every edge.
         const r = wrap.getBoundingClientRect();
         const hx = r.left + r.width * 0.46;
         const hy = r.top + r.height * 0.14;
@@ -63,22 +90,47 @@ export function HeroCharacter({ className = "", title }: { className?: string; t
         gx = Math.sign(tx) * Math.pow(Math.min(1, Math.abs(tx)), 0.85);
         gy = Math.sign(ty) * Math.pow(Math.min(1, Math.abs(ty)), 0.85);
       } else {
-        gx = Math.sin(t / 2400) * 0.6;
-        gy = Math.sin(t / 3100 + 1) * 0.25;
+        gx = Math.sin(t / 2600) * 0.9;
+        gy = Math.sin(t / 3300 + 1) * 0.6;
       }
-      // Breathing, so the figure is never perfectly still.
+      cur.x += (gx - cur.x) * 0.14;
+      cur.y += (gy - cur.y) * 0.14;
       const breathe = Math.sin(t / 900);
-      cur.x += (gx - cur.x) * 0.16;
-      cur.y += (gy - cur.y) * 0.16;
-      // The eyes react faster than the head, so they arrive first and the head follows.
-      gaze.x += (gx - gaze.x) * 0.34;
-      gaze.y += (gy - gaze.y) * 0.34;
-      const tx = `${gaze.x * EYE_TRAVEL.x * 100 * 0.8}%`;
-      const ty = `${gaze.y * EYE_TRAVEL.y * 100 * 0.8}%`;
-      for (const img of eyes.current) if (img) img.style.transform = `translate3d(${tx},${ty},0)`;
-      headEl.style.transform =
-        `perspective(900px) translate3d(${cur.x * 8}px,${cur.y * 5 + breathe * 0.8}px,0) rotateZ(${cur.x * 6}deg) rotateY(${cur.x * 26}deg) rotateX(${-cur.y * 15}deg)`;
-      bodyEl.style.transform = `translate3d(${cur.x * 3}px,${breathe * 0.7}px,0) rotateZ(${cur.x * 1.3}deg) scaleY(${1 + breathe * 0.0035})`;
+
+      // Bilinear weights over the 3 x 3 grid.
+      const col0 = cur.x < 0 ? 0 : 1;
+      const row0 = cur.y < 0 ? 0 : 1;
+      const fx = smooth(cur.x < 0 ? cur.x + 1 : cur.x);
+      const fy = smooth(cur.y < 0 ? cur.y + 1 : cur.y);
+      const w = new Array<number>(9).fill(0);
+      const put = (r: number, c: number, v: number) => {
+        const i = r * 3 + c;
+        if (loaded.current.has(i)) w[i] += v;
+      };
+      put(row0, col0, (1 - fx) * (1 - fy));
+      put(row0, col0 + 1, fx * (1 - fy));
+      put(row0 + 1, col0, (1 - fx) * fy);
+      put(row0 + 1, col0 + 1, fx * fy);
+      const total = w.reduce((a, b) => a + b, 0);
+      if (total === 0) w[4] = 1;
+      // Each layer's opacity is its share of the weight so far, which makes the stack an exact weighted blend.
+      let cum = 0;
+      for (let i = 0; i < 9; i++) {
+        const img = layers.current[i];
+        if (!img) continue;
+        const wi = total === 0 ? w[i] : w[i] / total;
+        cum += wi;
+        img.style.opacity = wi > 0.002 ? String(wi / cum) : "0";
+      }
+
+      headEl.style.transform = `translate3d(${cur.x * 3}px,${cur.y * 2 + breathe * 0.7}px,0) rotateZ(${cur.x * 2.2}deg)`;
+      bodyEl.style.transform = `translate3d(${cur.x * 2}px,${breathe * 0.6}px,0) rotateZ(${cur.x * 0.9}deg) scaleY(${1 + breathe * 0.003})`;
+
+      const label = labelFor(cur.x, cur.y);
+      if (label !== lastLabel) {
+        lastLabel = label;
+        onLookRef.current?.(label);
+      }
       raf = requestAnimationFrame(frame);
     };
     const start = () => {
@@ -86,14 +138,12 @@ export function HeroCharacter({ className = "", title }: { className?: string; t
       running = true;
       raf = requestAnimationFrame(frame);
     };
-
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
       if (visible) start();
     });
     io.observe(wrap);
     start();
-
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
@@ -106,24 +156,24 @@ export function HeroCharacter({ className = "", title }: { className?: string; t
   return (
     <div ref={box} className={`relative ${className}`} style={{ aspectRatio: "306 / 900" }} role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
       <img ref={body} src="/images/characters/hero-body.webp" width={306} height={900} alt="" fetchPriority="high" decoding="async" draggable={false} className="absolute inset-0 h-full w-full will-change-transform" style={{ transformOrigin: "50% 100%" }} />
-      <div ref={head} className="absolute inset-0 will-change-transform" style={{ transformOrigin: PIVOT }}>
-        <img src="/images/characters/hero-head.webp" width={306} height={900} alt="" fetchPriority="high" decoding="async" draggable={false} className="absolute inset-0 h-full w-full" />
-        {EYES.map((e, i) => (
-          <span key={e.src} className="absolute" style={{ left: `${e.box[0]}%`, top: `${e.box[1]}%`, width: `${e.box[2]}%`, height: `${e.box[3]}%`, clipPath: "ellipse(50% 50% at 50% 50%)" }}>
-            <img
-              ref={(n) => {
-                eyes.current[i] = n;
-              }}
-              src={e.src}
-              width={64}
-              height={64}
-              alt=""
-              decoding="async"
-              draggable={false}
-              className="absolute"
-              style={{ left: `${e.iris[0]}%`, top: `${e.iris[1]}%`, width: `${e.iris[2]}%`, height: `${e.iris[3]}%` }}
-            />
-          </span>
+      <div ref={head} className="absolute left-0 right-0 top-0 will-change-transform" style={{ height: `${HEAD_HEIGHT}%`, transformOrigin: HEAD_PIVOT }}>
+        {LAYERS.map((name, i) => (
+          <img
+            key={name}
+            ref={(n) => {
+              layers.current[i] = n;
+            }}
+            src={`/images/characters/look/${name}.webp`}
+            width={306}
+            height={261}
+            alt=""
+            decoding="async"
+            fetchPriority={i === 4 ? "high" : "low"}
+            draggable={false}
+            onLoad={() => loaded.current.add(i)}
+            className="absolute inset-0 h-full w-full"
+            style={{ opacity: i === 4 ? 1 : 0 }}
+          />
         ))}
       </div>
     </div>
